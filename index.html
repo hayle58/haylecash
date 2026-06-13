@@ -1,1 +1,457 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hayle Cash & Admin App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://alwingulla.com/zone/xxxxxx" data-zone="1234567" async data-cfasync="false"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background-color: #121212; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
+        
+        .app-container {
+            width: 100%; max-width: 400px; min-height: 650px; max-height: 800px;
+            background-color: #1a1a1a; border-radius: 25px; overflow: hidden;
+            border: 4px solid #333; display: flex; flex-direction: column; position: relative;
+        }
 
+        .top-nav { background-color: #2c2c2e; padding: 10px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #333; }
+        .nav-header { display: flex; justify-content: space-between; align-items: center; }
+        .app-title { font-weight: bold; color: #34c759; font-size: 1.1rem; cursor: pointer; }
+        .lang-box { display: flex; gap: 5px; align-items: center; }
+        .lang-btn { background: #333; color: #ff9f0a; border: none; padding: 3px 8px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
+
+        .nav-tabs { display: flex; justify-content: space-around; background: #222; border-radius: 8px; padding: 5px 0; }
+        .tab-btn { background: none; border: none; color: #aaa; cursor: pointer; font-size: 0.85rem; font-weight: bold; padding: 5px 10px; }
+        .tab-btn.active { color: #34c759; border-bottom: 2px solid #34c759; }
+
+        .screen { display: none; flex: 1; padding: 15px; overflow-y: auto; }
+        .screen.active { display: flex; flex-direction: column; }
+
+        .wallet-box { background: linear-gradient(135deg, #1d976c, #93f9b9); color: black; padding: 15px; border-radius: 15px; text-align: center; margin-bottom: 15px; font-weight: bold; }
+        .balance { font-size: 2rem; margin-top: 5px; }
+        h3 { color: #ff9f0a; margin-bottom: 12px; font-size: 1.1rem; text-align: center; }
+        .info-card { background: #2c2c2e; padding: 12px; border-radius: 12px; margin-bottom: 12px; }
+        .main-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: bold; cursor: pointer; color: white; }
+        .main-btn:disabled { background-color: #555 !important; color: #aaa; cursor: not-allowed; }
+        
+        .ad-box { background: #2c2c2e; padding: 15px; border-radius: 15px; text-align: center; }
+        .link-box { display: flex; background: #121212; padding: 8px; border-radius: 6px; align-items: center; justify-content: space-between; margin-top: 8px; }
+        .link-text { font-size: 0.75rem; color: #34c759; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; width: 75%; }
+        .copy-btn { background: #ff9f0a; color: black; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
+        .withdraw-input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: none; background: #121212; color: white; }
+        .id-badge { background: #222; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: #ff9f0a; text-align: center; margin-bottom: 15px; border: 1px dashed #444; }
+
+        /* ================= CONTROL PANEL STYLES ================= */
+        .admin-screen { background-color: #151515; display: none; flex: 1; padding: 15px; overflow-y: auto; }
+        .admin-screen.active { display: flex; flex-direction: column; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ff9f0a; padding-bottom: 8px; margin-bottom: 15px; }
+        .close-admin-btn { background: #ff3b30; color: white; border: none; padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
+        
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-card { background: #222; border-left: 4px solid #ff9f0a; padding: 10px; border-radius: 6px; text-align: center; }
+        .stat-card div { font-size: 1.2rem; font-weight: bold; color: #34c759; }
+        
+        .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
+        .search-input { flex: 1; padding: 10px; border-radius: 6px; border: none; background: #222; color: white; font-size: 0.85rem; }
+        .search-btn { background: #ff9f0a; color: black; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+
+        .req-list { margin-top: 10px; }
+        .req-item { background: #2c2c2e; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.85rem; border: 1px solid #444; }
+        .req-actions { display: flex; gap: 8px; margin-top: 8px; }
+        .action-btn { flex: 1; padding: 6px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
+        .approve-btn { background-color: #34c759; color: white; }
+        .reject-btn { background-color: #ff3b30; color: white; }
+        .broadcast-box textarea { width: 100%; height: 60px; background: #121212; color: white; border: 1px solid #444; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: none; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <div id="user-ui" style="display: flex; flex-direction: column; flex: 1;">
+        <div class="top-nav">
+            <div class="nav-header">
+                <div class="app-title" onclick="askAdminAccess()">Hayle Cash ⚙️</div>
+                <div class="lang-box">
+                    <button class="lang-btn" onclick="setLanguage('am')">አማ</button>
+                    <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+                </div>
+            </div>
+            <div class="nav-tabs">
+                <button class="tab-btn active" id="btn-home" onclick="switchScreen('home-screen', this)">Home</button>
+                <button class="tab-btn" id="btn-ads" onclick="switchScreen('ads-screen', this)">Ads</button>
+                <button class="tab-btn" id="btn-withdraw" onclick="switchScreen('withdraw-screen', this)">Withdraw</button>
+            </div>
+        </div>
+
+        <div id="home-screen" class="screen active">
+            <div class="id-badge">
+                🆔 Telegram ID: <span id="telegram-id-val">7154578421</span>
+            </div>
+
+            <div class="wallet-box">
+                <span id="txt-balance">ያለዎት ሂሳብ (Balance)</span>
+                <div class="balance"><span id="user-balance">0.00</span> ETB</div>
+            </div>
+            
+            <div class="info-card" id="broadcast-display" style="display:none; background: #3a2a00; border: 1px solid #ff9f0a;">
+                <h4 style="color:#ff9f0a; font-size:0.9rem;">📢 ከአስተዳዳሪው የተላከ መልዕክት፡</h4>
+                <p id="broadcast-text" style="font-size:0.85rem; margin-top:4px;"></p>
+            </div>
+
+            <div class="info-card">
+                <h3 id="txt-invite-title">👥 ሰው ጋብዘው ብር ያግኙ</h3>
+                <p style="font-size: 0.8rem; color:#ccc;" id="txt-invite-desc">የእርስዎን የግብዣ ሊንክ ለጓደኞችዎ በመላክ፣ እያንዳንዱ ሰው ሲቀላቀል 1 ብር ያግኙ!</p>
+                <div class="link-box">
+                    <div class="link-text" id="invite-link-str">https://t.me/HayleCashBot?start=7154578421</div>
+                    <button class="copy-btn" onclick="copyLink()" id="txt-copy-btn">ኮፒ</button>
+                </div>
+                <div style="font-size: 0.85rem; color: #ff9f0a; margin-top: 8px; text-align: center; font-weight: bold;">
+                    <span id="txt-invite-count-lbl">የጋበዙት ሰው ብዛት፦</span> <span id="invite-count">0</span> / 5
+                </div>
+                <button class="main-btn" style="background:#222; margin-top:10px; font-size:0.75rem; padding:5px;" onclick="simulateInvite()">➕ አንድ ሰው ለመጋበዝ (ለሙከራ)</button>
+            </div>
+        </div>
+
+        <div id="ads-screen" class="screen">
+            <h3 id="txt-ads-header">📺 ማስታወቂያዎችን አይተው ይርብሁ</h3>
+            <div class="ad-box">
+                <p style="margin-bottom: 10px;" id="txt-ad-reward">እያንዳንዱ ማስታወቂያ፡ 0.3 ብር ይከፍላል</p>
+                <button class="main-btn" style="background-color: #34c759;" onclick="watchAd()" id="txt-watch-btn">ማስታወቂያ እይ</button>
+                <div style="font-size: 0.85rem; color: #aaa; margin-top: 10px;"><span id="txt-ad-count-label">የዛሬው የቀረዎት ማስታወቂያ፦</span> <span id="ad-remaining">20</span>/20</div>
+            </div>
+        </div>
+
+        <div id="withdraw-screen" class="screen">
+            <h3 id="txt-withdraw-header">💸 ገንዘብ ማውጫ (Telebirr)</h3>
+            <div class="info-card">
+                <p style="font-size:0.8rem; margin-bottom:8px; color:#aaa;" id="txt-withdraw-limits">ደረጃ፦ አነስተኛ ማውጫ 50 ብር | ከፍተኛ ማውጫ 50 ብር</p>
+                <p style="font-size:0.8rem; margin-bottom:8px; color:#ff9f0a; font-weight:bold;" id="txt-withdraw-reqs">መስፈርት፦ ገንዘብ ለማውጣት ቢያንስ 5 ሰው መጋበዝ አለብዎት!</p>
+                <input type="text" class="withdraw-input" id="telebirr-phone" placeholder="የቴሌብር ስልክ ቁጥር ያስገቡ">
+                <button class="main-btn" style="background-color: #ff9f0a; color: black;" onclick="handleWithdraw()" id="txt-submit-withdraw">የማውጫ ጥያቄ ላክ</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-ui" class="admin-screen">
+        <div class="admin-header">
+            <h2 style="color: #ff9f0a; font-size: 1.1rem;">Hayle Cash Control Panel ⚙️</h2>
+            <button class="close-admin-btn" onclick="closeAdmin()">ውጣ (Exit)</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">ጥያቄዎች (Pending)<div id="stat-pending">0</div></div>
+            <div class="stat-card">ጠቅላላ የተከፈለ (Paid)<div id="stat-paid">0.00 ETB</div></div>
+        </div>
+
+        <div class="info-card" style="padding: 10px;">
+            <h4 style="font-size:0.85rem; color:#aaa; margin-bottom:8px;">🔍 ተጠቃሚ በ Control Panel ID ፈልግ</h4>
+            <div class="search-box">
+                <input type="text" class="search-input" id="admin-search-id" placeholder="የቴሌግራም ID ያስገቡ...">
+                <button class="search-btn" onclick="searchByTelegramId()">ፈልግ</button>
+            </div>
+        </div>
+
+        <div class="info-card broadcast-box">
+            <h4 style="color: #34c759; margin-bottom: 5px; font-size:0.9rem;">📢 የብሮድካስት መልዕክት መላኪያ</h4>
+            <textarea id="broadcast-input" placeholder="የሚልኩትን መልዕክት እዚህ ይጻፉ..."></textarea>
+            <button class="main-btn" style="background-color: #34c759; padding: 8px;" onclick="sendBroadcast()">መልዕክቱን ላክ</button>
+        </div>
+
+        <h3 style="text-align: left; border-bottom: 1px solid #333; padding-bottom: 5px; font-size: 1rem;">📥 የጥያቄዎች ዝርዝር (Control Panel)</h3>
+        <div class="req-list" id="admin-req-list"></div>
+    </div>
+
+</div>
+
+<script>
+    // ቴሌግራም ዌብ አፑን ማስነሳት
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // አፑ ሙሉ ስክሪን እንዲሆን
+
+    const BOT_TOKEN = "8529115333:AAHTitBmsAuF3y_cm5qPhpHS8V0Qp7us5B0";
+    const ADMIN_CHAT_ID = "7154578421";
+
+    let myTelegramId = "7154578421"; 
+    
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        myTelegramId = tg.initDataUnsafe.user.id.toString();
+    }
+    document.getElementById("telegram-id-val").innerText = myTelegramId;
+    document.getElementById("invite-link-str").innerText = "https://t.me/HayleCashBot?start=" + myTelegramId;
+
+    let balance = parseFloat(localStorage.getItem("appBalance")) || 0.00;
+    let adsWatchedToday = parseInt(localStorage.getItem("adsWatchedCount")) || 0;
+    let lastWatchDate = localStorage.getItem("lastWatchDate") || "";
+    let inviteCount = parseInt(localStorage.getItem("userInviteCount")) || 0;
+    let cooldownEndTime = parseInt(localStorage.getItem("cooldownEndTime")) || 0;
+    let cooldownInterval;
+    let currentLang = localStorage.getItem("lang") || "am";
+
+    let pendingRequests = JSON.parse(localStorage.getItem("adminRequests")) || [];
+    let totalPaidOut = parseFloat(localStorage.getItem("adminTotalPaid")) || 0.00;
+    let currentBroadcast = localStorage.getItem("adminBroadcastText") || "";
+
+    let todayStr = new Date().toDateString();
+    if (lastWatchDate !== todayStr) {
+        adsWatchedToday = 0;
+        localStorage.setItem("adsWatchedCount", 0);
+        localStorage.setItem("lastWatchDate", todayStr);
+    }
+
+    const textData = {
+        am: {
+            bal: "ያለዎት ሂሳብ (Balance)", inviteTitle: "👥 ሰው ጋብዘው ብር ያግኙ",
+            inviteDesc: "የእርስዎን የግብዣ ሊንክ ለጓደኞችዎ በመላክ፣ እያንዳንዱ ሰው ሲቀላቀል 1 ብር ያግኙ!",
+            copy: "ኮፒ", adsH: "📺 ማስታወቂያዎችን አይተው ይርብሁ", adRew: "እያንዳንዱ ማስታወቂያ፡ 0.3 ብር ይከፍላል",
+            watch: "ማስታወቂያ እይ", remLabel: "የዛሬው የቀረዎት ማስታወቂያ፦", withdrawH: "💸 ገንዘብ ማውጫ (Telebirr)",
+            limits: "ደረጃ፦ አነስተኛ ማውጫ 50 ብር | ከፍተኛ ማውጫ 50 ብር", phonePlace: "የቴሌብር ስልክ ቁጥር ያስገቡ",
+            submitW: "የማውጫ ጥያቄ ላክ", invLbl: "የጋበዙት ሰው ብዛት፦", reqs: "መስፈርት፦ ገንዘብ ለማውጣት ቢያንስ 5 ሰው መጋበዝ አለብዎት!",
+            copied: "ሊንኩ በተሳካ ሁኔታ ኮፒ ሆኗል!", noAds: "ይቅርታ! ለዛሬ የተፈቀደልዎ 20 ማስታወቂያ ጨርሰዋል። ነገ ይመለሱ!",
+            watching: "ማስታወቂያ በመታየት ላይ ነው...", successAd: "የማስታወቂያ ክፍያ 0.3 ብር ተጨምሮልዎታል!",
+            lowBal: "ይቅርታ! ማውጣት የሚቻለው በትክክል 50 ብር ሲኖርዎት ብቻ ነው!", invalidPhone: "እባክዎ ትክክለኛ የቴሌብር ስልክ ቁጥር ያስገቡ!",
+            lowInvites: "ይቅርታ! ማውጣት የሚቻለው ቢያንስ 5 ሰው ሲገብዙ ብቻ ነው። የጋበዙት፦ ", sentReq: "የማውጫ ጥያቄዎ በ Control Panel ላይ ተመዝግቧል!"
+        },
+        en: {
+            bal: "Your Balance", inviteTitle: "👥 Invite & Earn",
+            inviteDesc: "Share your invite link with friends, and earn 1 ETB for each successful sign up!",
+            copy: "Copy", adsH: "📺 Watch Ads & Earn Money", adRew: "Each ad pays: 0.3 ETB",
+            watch: "Watch Ad", remLabel: "Remaining ads today:", withdrawH: "💸 Withdraw (Telebirr)",
+            limits: "Limits: Minimum 50 ETB | Maximum 50 ETB", phonePlace: "Enter Telebirr Phone Number",
+            submitW: "Submit Withdraw Request", invLbl: "Invited Users:", reqs: "Requirement: You must invite at least 5 people to withdraw!",
+            copied: "Link copied to clipboard!", noAds: "Sorry! You have reached today's limit of 20 ads. Come back tomorrow!",
+            watching: "Loading ad... please wait", successAd: "0.3 ETB added to your balance!",
+            lowBal: "Sorry! You can only withdraw exactly 50 ETB!", invalidPhone: "Please enter a valid Telebirr phone number!",
+            lowInvites: "Sorry! You must invite at least 5 people to withdraw. Current: ", sentReq: "Your request has been saved to Control Panel!"
+        }
+    };
+
+    function updateUI() {
+        document.getElementById("user-balance").innerText = balance.toFixed(2);
+        document.getElementById("ad-remaining").innerText = (20 - adsWatchedToday);
+        document.getElementById("invite-count").innerText = inviteCount;
+        
+        let t = textData[currentLang];
+        document.getElementById("txt-balance").innerText = t.bal;
+        document.getElementById("txt-invite-title").innerText = t.inviteTitle;
+        document.getElementById("txt-invite-desc").innerText = t.inviteDesc;
+        document.getElementById("txt-copy-btn").innerText = t.copy;
+        document.getElementById("txt-ads-header").innerText = t.adsH;
+        document.getElementById("txt-ad-reward").innerText = t.adRew;
+        document.getElementById("txt-watch-btn").innerText = t.watch;
+        document.getElementById("txt-ad-count-label").innerText = t.remLabel;
+        document.getElementById("txt-withdraw-header").innerText = t.withdrawH;
+        document.getElementById("txt-withdraw-limits").innerText = t.limits;
+        document.getElementById("txt-withdraw-reqs").innerText = t.reqs;
+        document.getElementById("telebirr-phone").placeholder = t.phonePlace;
+        document.getElementById("txt-submit-withdraw").innerText = t.submitW;
+        document.getElementById("txt-invite-count-lbl").innerText = t.invLbl;
+
+        if (currentBroadcast.trim() !== "") {
+            document.getElementById("broadcast-display").style.display = "block";
+            document.getElementById("broadcast-text").innerText = currentBroadcast;
+        } else {
+            document.getElementById("broadcast-display").style.display = "none";
+        }
+        checkCooldown();
+    }
+
+    function switchScreen(screenId, btn) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        localStorage.setItem("lang", lang);
+        updateUI();
+    }
+
+    function checkCooldown() {
+        let now = Date.now();
+        let watchBtn = document.getElementById("txt-watch-btn");
+        if (cooldownEndTime > now) {
+            watchBtn.disabled = true;
+            clearInterval(cooldownInterval);
+            cooldownInterval = setInterval(() => {
+                let timeLeft = Math.ceil((cooldownEndTime - Date.now()) / 1000);
+                if (timeLeft <= 0) {
+                    clearInterval(cooldownInterval);
+                    watchBtn.disabled = false;
+                    watchBtn.innerText = textData[currentLang].watch;
+                } else {
+                    watchBtn.innerText = currentLang === 'am' ? `እባክዎ ይጠብቁ (${timeLeft}ሰ)` : `Please wait (${timeLeft}s)`;
+                }
+            }, 1000);
+        } else {
+            watchBtn.disabled = false;
+        }
+    }
+
+    function watchAd() {
+        let t = textData[currentLang];
+        if (adsWatchedToday >= 20) { alert(t.noAds); return; }
+        
+        if (typeof show_8543921 === 'function') {
+            show_8543921();
+        } else {
+            window.open('https://www.highratecpm.com/wceb6df0m?key=03ccb60f15764d858348d5eb56e8b4bb', '_blank');
+        }
+
+        balance += 0.30;
+        adsWatchedToday++;
+        cooldownEndTime = Date.now() + (30 * 1000);
+        localStorage.setItem("appBalance", balance);
+        localStorage.setItem("adsWatchedCount", adsWatchedToday);
+        localStorage.setItem("cooldownEndTime", cooldownEndTime);
+        updateUI();
+        alert(t.successAd);
+    }
+
+    function copyLink() {
+        let textToCopy = document.getElementById("invite-link-str").innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => { alert(textData[currentLang].copied); });
+    }
+
+    function simulateInvite() {
+        balance += 1.00; inviteCount += 1;
+        localStorage.setItem("appBalance", balance);
+        localStorage.setItem("userInviteCount", inviteCount);
+        updateUI();
+    }
+
+    function sendTelegramNotification(msg) {
+        let url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_CHAT_ID}&text=${encodeURIComponent(msg)}`;
+        fetch(url).then(res => console.log("Notified")).catch(err => console.error(err));
+    }
+
+    function handleWithdraw() {
+        let t = textData[currentLang];
+        let phone = document.getElementById("telebirr-phone").value;
+
+        if (inviteCount < 5) { alert(t.lowInvites + inviteCount); return; }
+        if (balance < 50.00) { alert(t.lowBal); return; }
+        if (phone.trim() === "" || phone.length < 9) { alert(t.invalidPhone); return; }
+
+        let newRequest = {
+            id: Date.now(),
+            tgId: myTelegramId,
+            phone: phone,
+            amount: 50.00,
+            date: new Date().toLocaleString()
+        };
+
+        pendingRequests.push(newRequest);
+        localStorage.setItem("adminRequests", JSON.stringify(pendingRequests));
+
+        let alertMessage = `📥 አዲስ ጥያቄ በ Control Panel ላይ አርፏል!\n\n👤 ID: ${myTelegramId}\n📱 ቴሌብር: ${phone}\n💰 መጠን: 50.00 ETB`;
+        sendTelegramNotification(alertMessage);
+
+        balance -= 50.00;
+        localStorage.setItem("appBalance", balance);
+        updateUI();
+        
+        document.getElementById("telebirr-phone").value = "";
+        alert(t.sentReq);
+    }
+
+    // ================= CONTROL PANEL FUNCTIONS =================
+    function askAdminAccess() {
+        let password = prompt("የ Control Panel የሚስጥር ቁጥር ያስገቡ፦");
+        if (password === "070322") { 
+            document.getElementById("user-ui").style.display = "none";
+            document.getElementById("admin-ui").classList.add("active");
+            renderAdminPanel(pendingRequests);
+        } else if (password !== null) {
+            alert("የተሳሳተ የሚስጥር ቁጥር ነው!");
+        }
+    }
+
+    function closeAdmin() {
+        document.getElementById("admin-ui").classList.remove("active");
+        document.getElementById("user-ui").style.display = "flex";
+        updateUI();
+    }
+
+    function renderAdminPanel(reqArray) {
+        document.getElementById("stat-pending").innerText = pendingRequests.length;
+        document.getElementById("stat-paid").innerText = totalPaidOut.toFixed(2) + " ETB";
+
+        let listContainer = document.getElementById("admin-req-list");
+        listContainer.innerHTML = "";
+
+        if (reqArray.length === 0) {
+            listContainer.innerHTML = "<p style='color:#aaa; text-align:center; font-size:0.9rem;'>ምንም አዲስ ጥያቄ በ Control Panel ላይ የለም።</p>";
+            return;
+        }
+
+        reqArray.forEach(req => {
+            let item = document.createElement("div");
+            item.className = "req-item";
+            item.innerHTML = `
+                <div><strong>Telegram ID፦</strong> <span style="color:#34c759; font-weight:bold;">${req.tgId}</span></div>
+                <div><strong>የቴሌብር ስልክ፦</strong> <span style="color:#ff9f0a; font-weight:bold;">${req.phone}</span></div>
+                <div><strong>የገንዘብ መጠን፦</strong> ${req.amount} ETB</div>
+                <div><strong>ቀን፦</strong> ${req.date}</div>
+                <div class="req-actions">
+                    <button class="action-btn approve-btn" onclick="approveRequest(${req.id})">✔️ አጽድቅ (Approve)</button>
+                    <button class="action-btn reject-btn" onclick="rejectRequest(${req.id})">❌ ሰርዝ (Reject)</button>
+                </div>
+            `;
+            listContainer.appendChild(item);
+        });
+    }
+
+    function searchByTelegramId() {
+        let searchId = document.getElementById("admin-search-id").value.trim();
+        if (searchId === "") {
+            renderAdminPanel(pendingRequests);
+            return;
+        }
+        let filteredRequests = pendingRequests.filter(req => req.tgId.includes(searchId));
+        renderAdminPanel(filteredRequests);
+    }
+
+    function approveRequest(id) {
+        let reqIndex = pendingRequests.findIndex(r => r.id === id);
+        if (reqIndex > -1) {
+            totalPaidOut += pendingRequests[reqIndex].amount;
+            localStorage.setItem("adminTotalPaid", totalPaidOut);
+            
+            pendingRequests.splice(reqIndex, 1);
+            localStorage.setItem("adminRequests", JSON.stringify(pendingRequests));
+            
+            alert("ጥያቄው በ Control Panel ጸድቋል!");
+            document.getElementById("admin-search-id").value = "";
+            renderAdminPanel(pendingRequests);
+        }
+    }
+
+    function rejectRequest(id) {
+        let reqIndex = pendingRequests.findIndex(r => r.id === id);
+        if (reqIndex > -1) {
+            pendingRequests.splice(reqIndex, 1);
+            localStorage.setItem("adminRequests", JSON.stringify(pendingRequests));
+            
+            alert("ጥያቄው ውድቅ ተደርጓል።");
+            document.getElementById("admin-search-id").value = "";
+            renderAdminPanel(pendingRequests);
+        }
+    }
+
+    function sendBroadcast() {
+        let input = document.getElementById("broadcast-input").value;
+        currentBroadcast = input;
+        localStorage.setItem("adminBroadcastText", currentBroadcast);
+        alert("የብሮድካስት መልዕክቱ ተልኳል!");
+        document.getElementById("broadcast-input").value = "";
+    }
+
+    updateUI();
+</script>
+</body>
+</html>
