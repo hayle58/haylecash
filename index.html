@@ -3,77 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hayle Cash & Admin App</title>
+    <title>Ethio Ads Watch</title>
+    <!-- የቴሌግራም ዌብ አፕ ስክሪፕት -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://alwingulla.com/zone/xxxxxx" data-zone="1234567" async data-cfasync="false"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { background-color: #121212; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0b0c10; color: #c5c6c7; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
         
         .app-container {
             width: 100%; max-width: 400px; min-height: 650px; max-height: 800px;
-            background-color: #1a1a1a; border-radius: 25px; overflow: hidden;
-            border: 4px solid #333; display: flex; flex-direction: column; position: relative;
+            background-color: #1f2833; border-radius: 25px; overflow: hidden;
+            border: 3px solid #45f3ff; display: flex; flex-direction: column; position: relative;
+            box-shadow: 0 0 20px rgba(69, 243, 255, 0.2);
         }
 
-        .top-nav { background-color: #2c2c2e; padding: 10px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #333; }
+        .top-nav { background-color: #151b24; padding: 12px; display: flex; flex-direction: column; gap: 8px; border-bottom: 2px solid #45f3ff; }
         .nav-header { display: flex; justify-content: space-between; align-items: center; }
-        .app-title { font-weight: bold; color: #34c759; font-size: 1.1rem; cursor: pointer; }
+        .app-title { font-weight: bold; color: #45f3ff; font-size: 1.2rem; cursor: pointer; text-shadow: 0 0 10px rgba(69, 243, 255, 0.5); }
         .lang-box { display: flex; gap: 5px; align-items: center; }
-        .lang-btn { background: #333; color: #ff9f0a; border: none; padding: 3px 8px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
+        .lang-btn { background: #1f2833; color: #ffbd59; border: 1px solid #ffbd59; padding: 3px 8px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
 
-        .nav-tabs { display: flex; justify-content: space-around; background: #222; border-radius: 8px; padding: 5px 0; }
-        .tab-btn { background: none; border: none; color: #aaa; cursor: pointer; font-size: 0.85rem; font-weight: bold; padding: 5px 10px; }
-        .tab-btn.active { color: #34c759; border-bottom: 2px solid #34c759; }
+        .nav-tabs { display: grid; grid-template-columns: repeat(4, 1fr); background: #0b0c10; border-radius: 10px; padding: 4px; gap: 2px; }
+        .tab-btn { background: none; border: none; color: #888; cursor: pointer; font-size: 0.75rem; font-weight: bold; padding: 8px 2px; text-align: center; border-radius: 6px; }
+        .tab-btn.active { color: #0b0c10; background-color: #45f3ff; box-shadow: 0 0 10px rgba(69, 243, 255, 0.4); }
 
         .screen { display: none; flex: 1; padding: 15px; overflow-y: auto; }
         .screen.active { display: flex; flex-direction: column; }
 
-        .wallet-box { background: linear-gradient(135deg, #1d976c, #93f9b9); color: black; padding: 15px; border-radius: 15px; text-align: center; margin-bottom: 15px; font-weight: bold; }
-        .balance { font-size: 2rem; margin-top: 5px; }
-        h3 { color: #ff9f0a; margin-bottom: 12px; font-size: 1.1rem; text-align: center; }
-        .info-card { background: #2c2c2e; padding: 12px; border-radius: 12px; margin-bottom: 12px; }
-        .main-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: bold; cursor: pointer; color: white; }
-        .main-btn:disabled { background-color: #555 !important; color: #aaa; cursor: not-allowed; }
+        .wallet-box { background: linear-gradient(135deg, #ffbd59, #ff9f0a); color: #0b0c10; padding: 18px; border-radius: 15px; text-align: center; margin-bottom: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 189, 89, 0.3); }
+        .balance { font-size: 2.2rem; margin-top: 5px; font-weight: 800; }
+        h3 { color: #ffbd59; margin-bottom: 12px; font-size: 1.1rem; text-align: center; text-transform: uppercase; }
+        .info-card { background: #151b24; padding: 14px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #2f3b4c; }
         
-        .ad-box { background: #2c2c2e; padding: 15px; border-radius: 15px; text-align: center; }
-        .link-box { display: flex; background: #121212; padding: 8px; border-radius: 6px; align-items: center; justify-content: space-between; margin-top: 8px; }
-        .link-text { font-size: 0.75rem; color: #34c759; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; width: 75%; }
-        .copy-btn { background: #ff9f0a; color: black; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
-        .withdraw-input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: none; background: #121212; color: white; }
-        .id-badge { background: #222; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: #ff9f0a; text-align: center; margin-bottom: 15px; border: 1px dashed #444; }
+        .main-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: bold; cursor: pointer; color: #0b0c10; background-color: #45f3ff; transition: all 0.2s ease; }
+        .main-btn:active { transform: scale(0.98); }
+        .main-btn:disabled { background-color: #555 !important; color: #aaa; cursor: not-allowed; box-shadow: none !important; }
+        
+        .ad-box { background: #151b24; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #2f3b4c; }
+        .link-box { display: flex; background: #0b0c10; padding: 10px; border-radius: 8px; align-items: center; justify-content: space-between; margin-top: 8px; border: 1px solid #45f3ff; }
+        .link-text { font-size: 0.75rem; color: #45f3ff; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; width: 75%; }
+        .copy-btn { background: #ffbd59; color: #0b0c10; border: none; padding: 5px 10px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
+        
+        .withdraw-select { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #45f3ff; background: #0b0c10; color: white; font-size: 0.9rem; }
+        .withdraw-input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #2f3b4c; background: #0b0c10; color: white; font-size: 0.9rem; }
+        .withdraw-input:focus { border-color: #45f3ff; outline: none; }
+        
+        .id-badge { background: #0b0c10; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: #ffbd59; text-align: center; margin-bottom: 15px; border: 1px solid #ffbd59; }
 
         /* ================= CONTROL PANEL STYLES ================= */
-        .admin-screen { background-color: #151515; display: none; flex: 1; padding: 15px; overflow-y: auto; }
+        .admin-screen { background-color: #0b0c10; display: none; flex: 1; padding: 15px; overflow-y: auto; }
         .admin-screen.active { display: flex; flex-direction: column; }
-        .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ff9f0a; padding-bottom: 8px; margin-bottom: 15px; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffbd59; padding-bottom: 8px; margin-bottom: 15px; }
         .close-admin-btn { background: #ff3b30; color: white; border: none; padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
         
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-card { background: #222; border-left: 4px solid #ff9f0a; padding: 10px; border-radius: 6px; text-align: center; }
-        .stat-card div { font-size: 1.2rem; font-weight: bold; color: #34c759; }
+        .stat-card { background: #151b24; border-left: 4px solid #ffbd59; padding: 10px; border-radius: 6px; text-align: center; }
+        .stat-card div { font-size: 1.2rem; font-weight: bold; color: #45f3ff; }
         
         .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
-        .search-input { flex: 1; padding: 10px; border-radius: 6px; border: none; background: #222; color: white; font-size: 0.85rem; }
-        .search-btn { background: #ff9f0a; color: black; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .search-input { flex: 1; padding: 10px; border-radius: 6px; border: none; background: #151b24; color: white; font-size: 0.85rem; border: 1px solid #2f3b4c; }
+        .search-btn { background: #ffbd59; color: #0b0c10; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
         .req-list { margin-top: 10px; }
-        .req-item { background: #2c2c2e; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.85rem; border: 1px solid #444; }
+        .req-item { background: #151b24; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.85rem; border: 1px solid #2f3b4c; }
         .req-actions { display: flex; gap: 8px; margin-top: 8px; }
         .action-btn { flex: 1; padding: 6px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
-        .approve-btn { background-color: #34c759; color: white; }
+        .approve-btn { background-color: #45f3ff; color: #0b0c10; }
         .reject-btn { background-color: #ff3b30; color: white; }
-        .broadcast-box textarea { width: 100%; height: 60px; background: #121212; color: white; border: 1px solid #444; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: none; margin-bottom: 8px; }
+        .broadcast-box textarea { width: 100%; height: 60px; background: #0b0c10; color: white; border: 1px solid #2f3b4c; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: none; margin-bottom: 8px; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     
+    <!-- USER UI -->
     <div id="user-ui" style="display: flex; flex-direction: column; flex: 1;">
         <div class="top-nav">
             <div class="nav-header">
-                <div class="app-title" onclick="askAdminAccess()">Hayle Cash ⚙️</div>
+                <div class="app-title" onclick="askAdminAccess()">Ethio Ads Watch ⚙️</div>
                 <div class="lang-box">
                     <button class="lang-btn" onclick="setLanguage('am')">አማ</button>
                     <button class="lang-btn" onclick="setLanguage('en')">EN</button>
@@ -83,9 +92,11 @@
                 <button class="tab-btn active" id="btn-home" onclick="switchScreen('home-screen', this)">Home</button>
                 <button class="tab-btn" id="btn-ads" onclick="switchScreen('ads-screen', this)">Ads</button>
                 <button class="tab-btn" id="btn-withdraw" onclick="switchScreen('withdraw-screen', this)">Withdraw</button>
+                <button class="tab-btn" id="btn-support" onclick="switchScreen('support-screen', this)">Support</button>
             </div>
         </div>
 
+        <!-- HOME SCREEN -->
         <div id="home-screen" class="screen active">
             <div class="id-badge">
                 🆔 Telegram ID: <span id="telegram-id-val">7154578421</span>
@@ -96,48 +107,71 @@
                 <div class="balance"><span id="user-balance">0.00</span> ETB</div>
             </div>
             
-            <div class="info-card" id="broadcast-display" style="display:none; background: #3a2a00; border: 1px solid #ff9f0a;">
-                <h4 style="color:#ff9f0a; font-size:0.9rem;">📢 ከአስተዳዳሪው የተላከ መልዕክት፡</h4>
-                <p id="broadcast-text" style="font-size:0.85rem; margin-top:4px;"></p>
+            <div class="info-card" id="broadcast-display" style="display:none; background: #2a2005; border: 1px solid #ffbd59;">
+                <h4 style="color:#ffbd59; font-size:0.9rem;">📢 ከአስተዳዳሪው የተላከ መልዕክት፡</h4>
+                <p id="broadcast-text" style="font-size:0.85rem; margin-top:4px; color:#fff;"></p>
             </div>
 
             <div class="info-card">
                 <h3 id="txt-invite-title">👥 ሰው ጋብዘው ብር ያግኙ</h3>
-                <p style="font-size: 0.8rem; color:#ccc;" id="txt-invite-desc">የእርስዎን የግብዣ ሊንክ ለጓደኞችዎ በመላክ፣ እያንዳንዱ ሰው ሲቀላቀል 1 ብር ያግኙ!</p>
+                <p style="font-size: 0.8rem; color:#a5a6a7; margin-bottom: 5px;" id="txt-invite-desc">የእርስዎን የግብዣ ሊንክ ለጓደኞችዎ በመላክ፣ እያንዳንዱ ሰው ሲቀላቀል 1 ብር ያግኙ!</p>
                 <div class="link-box">
-                    <div class="link-text" id="invite-link-str">https://t.me/HayleCashBot?start=7154578421</div>
+                    <div class="link-text" id="invite-link-str">https://t.me/EthioAdsWatch_bot?start=7154578421</div>
                     <button class="copy-btn" onclick="copyLink()" id="txt-copy-btn">ኮፒ</button>
                 </div>
-                <div style="font-size: 0.85rem; color: #ff9f0a; margin-top: 8px; text-align: center; font-weight: bold;">
+                <div style="font-size: 0.9rem; color: #ffbd59; margin-top: 10px; text-align: center; font-weight: bold;">
                     <span id="txt-invite-count-lbl">የጋበዙት ሰው ብዛት፦</span> <span id="invite-count">0</span> / 5
                 </div>
-                <button class="main-btn" style="background:#222; margin-top:10px; font-size:0.75rem; padding:5px;" onclick="simulateInvite()">➕ አንድ ሰው ለመጋበዝ (ለሙከራ)</button>
             </div>
         </div>
 
+        <!-- ADS SCREEN -->
         <div id="ads-screen" class="screen">
             <h3 id="txt-ads-header">📺 ማስታወቂያዎችን አይተው ይርብሁ</h3>
             <div class="ad-box">
-                <p style="margin-bottom: 10px;" id="txt-ad-reward">እያንዳንዱ ማስታወቂያ፡ 0.3 ብር ይከፍላል</p>
-                <button class="main-btn" style="background-color: #34c759;" onclick="watchAd()" id="txt-watch-btn">ማስታወቂያ እይ</button>
-                <div style="font-size: 0.85rem; color: #aaa; margin-top: 10px;"><span id="txt-ad-count-label">የዛሬው የቀረዎት ማስታወቂያ፦</span> <span id="ad-remaining">20</span>/20</div>
+                <p style="margin-bottom: 15px; color: #fff;" id="txt-ad-reward">እያንዳንዱ ማስታወቂያ፡ 0.3 ብር ይከፍላል</p>
+                <button class="main-btn" style="background-color: #45f3ff; box-shadow: 0 0 15px rgba(69,243,255,0.3);" onclick="watchAd()" id="txt-watch-btn">ማስታወቂያ እይ</button>
+                <div style="font-size: 0.85rem; color: #aaa; margin-top: 15px;"><span id="txt-ad-count-label">የዛሬው የቀረዎት ማስታወቂያ፦</span> <span id="ad-remaining">20</span>/20</div>
             </div>
         </div>
 
+        <!-- WITHDRAW SCREEN -->
         <div id="withdraw-screen" class="screen">
-            <h3 id="txt-withdraw-header">💸 ገንዘብ ማውጫ (Telebirr)</h3>
+            <h3 id="txt-withdraw-header">💸 ገንዘብ ማውጫ (Withdraw)</h3>
             <div class="info-card">
                 <p style="font-size:0.8rem; margin-bottom:8px; color:#aaa;" id="txt-withdraw-limits">ደረጃ፦ አነስተኛ ማውጫ 50 ብር | ከፍተኛ ማውጫ 50 ብር</p>
-                <p style="font-size:0.8rem; margin-bottom:8px; color:#ff9f0a; font-weight:bold;" id="txt-withdraw-reqs">መስፈርት፦ ገንዘብ ለማውጣት ቢያንስ 5 ሰው መጋበዝ አለብዎት!</p>
-                <input type="text" class="withdraw-input" id="telebirr-phone" placeholder="የቴሌብር ስልክ ቁጥር ያስገቡ">
-                <button class="main-btn" style="background-color: #ff9f0a; color: black;" onclick="handleWithdraw()" id="txt-submit-withdraw">የማውጫ ጥያቄ ላክ</button>
+                <p style="font-size:0.8rem; margin-bottom:12px; color:#ffbd59; font-weight:bold;" id="txt-withdraw-reqs">መስፈርት፦ ገንዘብ ለማውጣት ቢያንስ 5 ሰው መጋበዝ አለብዎት!</p>
+                
+                <label style="font-size:0.85rem; color:#45f3ff; display:block; margin-bottom:5px;">የማውጫ መንገድ (Method)፦</label>
+                <select class="withdraw-select" id="withdraw-method">
+                    <option value="Telebirr">Telebirr</option>
+                    <option value="CBE">CBE (የኢትዮጵያ ንግድ ባንክ)</option>
+                </select>
+
+                <label style="font-size:0.85rem; color:#45f3ff; display:block; margin-bottom:5px;">የስልክ ወይም የሂሳብ ቁጥር (Account/Phone)፦</label>
+                <input type="text" class="withdraw-input" id="withdraw-account" placeholder="የባንክ አካውንት ወይም ስልክ ያስገቡ">
+                
+                <label style="font-size:0.85rem; color:#45f3ff; display:block; margin-bottom:5px;">የገንዘብ መጠን (Amount)፦</label>
+                <input type="number" class="withdraw-input" id="withdraw-amount" placeholder="የብር መጠን (ለምሳሌ 50)" value="50">
+                
+                <button class="main-btn" style="background-color: #ffbd59; color: #0b0c10; font-weight: bold; margin-top: 5px;" onclick="handleWithdraw()" id="txt-submit-withdraw">የማውጫ ጥያቄ ላክ</button>
+            </div>
+        </div>
+
+        <!-- SUPPORT SCREEN -->
+        <div id="support-screen" class="screen">
+            <h3 id="txt-support-header">📞 የቴክኒክ እርዳታ (Support)</h3>
+            <div class="info-card" style="text-align: center; padding: 25px 15px;">
+                <p style="font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5; color: #fff;" id="txt-support-desc">ማንኛውም አይነት ችግር ወይም ጥያቄ ካጋጠመዎት ከታች ያለውን በተን በመንካት ዋናውን አስተዳዳሪ በቀጥታ ማግኘት ይችላሉ።</p>
+                <button class="main-btn" style="background-color: #ffbd59; color: #0b0c10;" onclick="openSupportLink()" id="txt-support-btn">አስተዳዳሪውን አግኝ (Contact Owner)</button>
             </div>
         </div>
     </div>
 
+    <!-- CONTROL PANEL (ADMIN UI) -->
     <div id="admin-ui" class="admin-screen">
         <div class="admin-header">
-            <h2 style="color: #ff9f0a; font-size: 1.1rem;">Hayle Cash Control Panel ⚙️</h2>
+            <h2 style="color: #ffbd59; font-size: 1.1rem;">Control Panel ⚙️</h2>
             <button class="close-admin-btn" onclick="closeAdmin()">ውጣ (Exit)</button>
         </div>
 
@@ -147,32 +181,32 @@
         </div>
 
         <div class="info-card" style="padding: 10px;">
-            <h4 style="font-size:0.85rem; color:#aaa; margin-bottom:8px;">🔍 ተጠቃሚ በ Control Panel ID ፈልግ</h4>
+            <h4 style="font-size:0.85rem; color:#aaa; margin-bottom:8px;">🔍 ተጠቃሚ በ Telegram ID ፈልግ</h4>
             <div class="search-box">
-                <input type="text" class="search-input" id="admin-search-id" placeholder="የቴሌግራም ID ያስገቡ...">
+                <input type="text" class="search-input" id="admin-search-id" placeholder="የቴሌግราม ID ያስገቡ...">
                 <button class="search-btn" onclick="searchByTelegramId()">ፈልግ</button>
             </div>
         </div>
 
         <div class="info-card broadcast-box">
-            <h4 style="color: #34c759; margin-bottom: 5px; font-size:0.9rem;">📢 የብሮድካስት መልዕክት መላኪያ</h4>
+            <h4 style="color: #45f3ff; margin-bottom: 5px; font-size:0.9rem;">📢 የብሮድካስት መልዕክት መላኪያ</h4>
             <textarea id="broadcast-input" placeholder="የሚልኩትን መልዕክት እዚህ ይጻፉ..."></textarea>
-            <button class="main-btn" style="background-color: #34c759; padding: 8px;" onclick="sendBroadcast()">መልዕክቱን ላክ</button>
+            <button class="main-btn" style="background-color: #45f3ff; padding: 8px;" onclick="sendBroadcast()">መልዕክቱን ላክ</button>
         </div>
 
-        <h3 style="text-align: left; border-bottom: 1px solid #333; padding-bottom: 5px; font-size: 1rem;">📥 የጥያቄዎች ዝርዝር (Control Panel)</h3>
+        <h3 style="text-align: left; border-bottom: 1px solid #333; padding-bottom: 5px; font-size: 1rem;">📥 የጥያቄዎች ዝርዝር</h3>
         <div class="req-list" id="admin-req-list"></div>
     </div>
 
 </div>
 
 <script>
-    // ቴሌግራም ዌብ አፑን ማስነሳት
     const tg = window.Telegram.WebApp;
-    tg.expand(); // አፑ ሙሉ ስክሪን እንዲሆን
+    tg.expand();
 
     const BOT_TOKEN = "8529115333:AAHTitBmsAuF3y_cm5qPhpHS8V0Qp7us5B0";
     const ADMIN_CHAT_ID = "7154578421";
+    const BOT_USERNAME = "EthioAdsWatch_bot";
 
     let myTelegramId = "7154578421"; 
     
@@ -180,7 +214,7 @@
         myTelegramId = tg.initDataUnsafe.user.id.toString();
     }
     document.getElementById("telegram-id-val").innerText = myTelegramId;
-    document.getElementById("invite-link-str").innerText = "https://t.me/HayleCashBot?start=" + myTelegramId;
+    document.getElementById("invite-link-str").innerText = `https://t.me/${BOT_USERNAME}?start=` + myTelegramId;
 
     let balance = parseFloat(localStorage.getItem("appBalance")) || 0.00;
     let adsWatchedToday = parseInt(localStorage.getItem("adsWatchedCount")) || 0;
@@ -206,25 +240,29 @@
             bal: "ያለዎት ሂሳብ (Balance)", inviteTitle: "👥 ሰው ጋብዘው ብር ያግኙ",
             inviteDesc: "የእርስዎን የግብዣ ሊንክ ለጓደኞችዎ በመላክ፣ እያንዳንዱ ሰው ሲቀላቀል 1 ብር ያግኙ!",
             copy: "ኮፒ", adsH: "📺 ማስታወቂያዎችን አይተው ይርብሁ", adRew: "እያንዳንዱ ማስታወቂያ፡ 0.3 ብር ይከፍላል",
-            watch: "ማስታወቂያ እይ", remLabel: "የዛሬው የቀረዎት ማስታወቂያ፦", withdrawH: "💸 ገንዘብ ማውጫ (Telebirr)",
-            limits: "ደረጃ፦ አነስተኛ ማውጫ 50 ብር | ከፍተኛ ማውጫ 50 ብር", phonePlace: "የቴሌብር ስልክ ቁጥር ያስገቡ",
+            watch: "ማስታወቂያ እይ", remLabel: "የዛሬው የቀረዎት ማስታወቂያ፦", withdrawH: "💸 ገንዘብ ማውጫ (Withdraw)",
+            limits: "ደረጃ፦ አነስተኛ ማውጫ 50 ብር | ከፍተኛ ማውጫ 50 ብር", phonePlace: "የባንክ አካውንት ወይም ስልክ ያስገቡ",
             submitW: "የማውጫ ጥያቄ ላክ", invLbl: "የጋበዙት ሰው ብዛት፦", reqs: "መስፈርት፦ ገንዘብ ለማውጣት ቢያንስ 5 ሰው መጋበዝ አለብዎት!",
             copied: "ሊንኩ በተሳካ ሁኔታ ኮፒ ሆኗል!", noAds: "ይቅርታ! ለዛሬ የተፈቀደልዎ 20 ማስታወቂያ ጨርሰዋል። ነገ ይመለሱ!",
             watching: "ማስታወቂያ በመታየት ላይ ነው...", successAd: "የማስታወቂያ ክፍያ 0.3 ብር ተጨምሮልዎታል!",
-            lowBal: "ይቅርታ! ማውጣት የሚቻለው በትክክል 50 ብር ሲኖርዎት ብቻ ነው!", invalidPhone: "እባክዎ ትክክለኛ የቴሌብር ስልክ ቁጥር ያስገቡ!",
-            lowInvites: "ይቅርታ! ማውጣት የሚቻለው ቢያንስ 5 ሰው ሲገብዙ ብቻ ነው። የጋበዙት፦ ", sentReq: "የማውጫ ጥያቄዎ በ Control Panel ላይ ተመዝግቧል!"
+            lowBal: "ይቅርታ! ማውጣት የሚቻለው ቢያንስ 50 ብር ሲኖርዎት ብቻ ነው!", invalidPhone: "እባክዎ ትክክለኛ የሂሳብ/ስልክ ቁጥር ያስገቡ!",
+            lowInvites: "ይቅርታ! ማውጣት የሚቻለው ቢያንስ 5 ሰው ሲገብዙ ብቻ ነው። የጋበዙት፦ ", sentReq: "የማውጫ ጥያቄዎ በ Control Panel ላይ ተመዝግቧል!",
+            supportH: "📞 የቴክኒክ እርዳታ (Support)", supportDesc: "ማንኛውም አይነት ችግር ወይም ጥያቄ ካጋጠመዎት ከታች ያለውን በተን በመንካት ዋናውን አስተዳዳሪ በቀጥታ ማግኘት ይችላሉ።",
+            supportBtn: "አስተዳዳሪውን አግኝ (Contact Owner)"
         },
         en: {
             bal: "Your Balance", inviteTitle: "👥 Invite & Earn",
             inviteDesc: "Share your invite link with friends, and earn 1 ETB for each successful sign up!",
             copy: "Copy", adsH: "📺 Watch Ads & Earn Money", adRew: "Each ad pays: 0.3 ETB",
-            watch: "Watch Ad", remLabel: "Remaining ads today:", withdrawH: "💸 Withdraw (Telebirr)",
-            limits: "Limits: Minimum 50 ETB | Maximum 50 ETB", phonePlace: "Enter Telebirr Phone Number",
+            watch: "Watch Ad", remLabel: "Remaining ads today:", withdrawH: "💸 Withdraw Money",
+            limits: "Limits: Minimum 50 ETB | Maximum 50 ETB", phonePlace: "Enter Account or Phone Number",
             submitW: "Submit Withdraw Request", invLbl: "Invited Users:", reqs: "Requirement: You must invite at least 5 people to withdraw!",
             copied: "Link copied to clipboard!", noAds: "Sorry! You have reached today's limit of 20 ads. Come back tomorrow!",
             watching: "Loading ad... please wait", successAd: "0.3 ETB added to your balance!",
-            lowBal: "Sorry! You can only withdraw exactly 50 ETB!", invalidPhone: "Please enter a valid Telebirr phone number!",
-            lowInvites: "Sorry! You must invite at least 5 people to withdraw. Current: ", sentReq: "Your request has been saved to Control Panel!"
+            lowBal: "Sorry! You need at least 50 ETB to withdraw!", invalidPhone: "Please enter a valid Account/Phone number!",
+            lowInvites: "Sorry! You must invite at least 5 people to withdraw. Current: ", sentReq: "Your request has been saved to Control Panel!",
+            supportH: "📞 Technical Support", supportDesc: "If you face any issues or have questions, click the button below to message the admin directly.",
+            supportBtn: "Contact Owner"
         }
     };
 
@@ -245,9 +283,12 @@
         document.getElementById("txt-withdraw-header").innerText = t.withdrawH;
         document.getElementById("txt-withdraw-limits").innerText = t.limits;
         document.getElementById("txt-withdraw-reqs").innerText = t.reqs;
-        document.getElementById("telebirr-phone").placeholder = t.phonePlace;
+        document.getElementById("withdraw-account").placeholder = t.phonePlace;
         document.getElementById("txt-submit-withdraw").innerText = t.submitW;
         document.getElementById("txt-invite-count-lbl").innerText = t.invLbl;
+        document.getElementById("txt-support-header").innerText = t.supportH;
+        document.getElementById("txt-support-desc").innerText = t.supportDesc;
+        document.getElementById("txt-support-btn").innerText = t.supportBtn;
 
         if (currentBroadcast.trim() !== "") {
             document.getElementById("broadcast-display").style.display = "block";
@@ -317,11 +358,9 @@
         navigator.clipboard.writeText(textToCopy).then(() => { alert(textData[currentLang].copied); });
     }
 
-    function simulateInvite() {
-        balance += 1.00; inviteCount += 1;
-        localStorage.setItem("appBalance", balance);
-        localStorage.setItem("userInviteCount", inviteCount);
-        updateUI();
+    function openSupportLink() {
+        // ወደ ባለቤቱ የቴሌግራም አካውንት በቀጥታ የሚወስድ ሊንክ
+        window.open("https://t.me/hayle58", "_blank");
     }
 
     function sendTelegramNotification(msg) {
@@ -331,31 +370,34 @@
 
     function handleWithdraw() {
         let t = textData[currentLang];
-        let phone = document.getElementById("telebirr-phone").value;
+        let method = document.getElementById("withdraw-method").value;
+        let account = document.getElementById("withdraw-account").value;
+        let amountInput = parseFloat(document.getElementById("withdraw-amount").value);
 
         if (inviteCount < 5) { alert(t.lowInvites + inviteCount); return; }
-        if (balance < 50.00) { alert(t.lowBal); return; }
-        if (phone.trim() === "" || phone.length < 9) { alert(t.invalidPhone); return; }
+        if (balance < amountInput || amountInput < 50.00) { alert(t.lowBal); return; }
+        if (account.trim() === "" || account.length < 8) { alert(t.invalidPhone); return; }
 
         let newRequest = {
             id: Date.now(),
             tgId: myTelegramId,
-            phone: phone,
-            amount: 50.00,
+            method: method,
+            account: account,
+            amount: amountInput,
             date: new Date().toLocaleString()
         };
 
         pendingRequests.push(newRequest);
         localStorage.setItem("adminRequests", JSON.stringify(pendingRequests));
 
-        let alertMessage = `📥 አዲስ ጥያቄ በ Control Panel ላይ አርፏል!\n\n👤 ID: ${myTelegramId}\n📱 ቴሌብር: ${phone}\n💰 መጠን: 50.00 ETB`;
+        let alertMessage = `📥 አዲስ የማውጫ ጥያቄ!\n\n👤 ID: ${myTelegramId}\n🏦 መንገድ: ${method}\n💳 አካውንት/ስልክ: ${account}\n💰 መጠን: ${amountInput.toFixed(2)} ETB`;
         sendTelegramNotification(alertMessage);
 
-        balance -= 50.00;
+        balance -= amountInput;
         localStorage.setItem("appBalance", balance);
         updateUI();
         
-        document.getElementById("telebirr-phone").value = "";
+        document.getElementById("withdraw-account").value = "";
         alert(t.sentReq);
     }
 
@@ -393,9 +435,10 @@
             let item = document.createElement("div");
             item.className = "req-item";
             item.innerHTML = `
-                <div><strong>Telegram ID፦</strong> <span style="color:#34c759; font-weight:bold;">${req.tgId}</span></div>
-                <div><strong>የቴሌብር ስልክ፦</strong> <span style="color:#ff9f0a; font-weight:bold;">${req.phone}</span></div>
-                <div><strong>የገንዘብ መጠን፦</strong> ${req.amount} ETB</div>
+                <div><strong>Telegram ID፦</strong> <span style="color:#45f3ff; font-weight:bold;">${req.tgId}</span></div>
+                <div><strong>የማውጫ መንገድ፦</strong> <span style="color:#ffbd59;">${req.method}</span></div>
+                <div><strong>አካውንት/ስልክ፦</strong> <span style="color:#fff; font-weight:bold;">${req.account}</span></div>
+                <div><strong>የገንዘብ መጠን፦</strong> ${req.amount.toFixed(2)} ETB</div>
                 <div><strong>ቀን፦</strong> ${req.date}</div>
                 <div class="req-actions">
                     <button class="action-btn approve-btn" onclick="approveRequest(${req.id})">✔️ አጽድቅ (Approve)</button>
