@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ethio Ads Watch</title>
-    <!-- የቴሌግራም ዌብ አፕ ስክሪፕት -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0b0c10; color: #c5c6c7; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
@@ -35,7 +35,7 @@
         h3 { color: #ffbd59; margin-bottom: 12px; font-size: 1.1rem; text-align: center; text-transform: uppercase; }
         .info-card { background: #151b24; padding: 14px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #2f3b4c; }
         
-        .main-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: bold; cursor: pointer; color: #0b0c10; background-color: #45f3ff; transition: all 0.2s ease; }
+        .main-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: bold; cursor: pointer; color: #0b0c10; background-color: #45f3ff; transition: all 0.2s ease; margin-bottom: 10px; }
         .main-btn:active { transform: scale(0.98); }
         .main-btn:disabled { background-color: #555 !important; color: #aaa; cursor: not-allowed; box-shadow: none !important; }
         
@@ -50,20 +50,19 @@
         
         .id-badge { background: #0b0c10; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: #ffbd59; text-align: center; margin-bottom: 15px; border: 1px solid #ffbd59; }
 
-        /* ================= CONTROL PANEL STYLES ================= */
+        .timer-banner { background-color: #ff9f0a; color: #0b0c10; padding: 8px; text-align: center; border-radius: 8px; margin-bottom: 10px; font-weight: bold; font-size: 0.85rem; display: none; }
+
+        /* Admin UI */
         .admin-screen { background-color: #0b0c10; display: none; flex: 1; padding: 15px; overflow-y: auto; }
         .admin-screen.active { display: flex; flex-direction: column; }
         .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffbd59; padding-bottom: 8px; margin-bottom: 15px; }
         .close-admin-btn { background: #ff3b30; color: white; border: none; padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
-        
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .stat-card { background: #151b24; border-left: 4px solid #ffbd59; padding: 10px; border-radius: 6px; text-align: center; font-size: 0.8rem; }
         .stat-card div { font-size: 1.1rem; font-weight: bold; color: #45f3ff; }
-        
         .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
-        .search-input { flex: 1; padding: 10px; border-radius: 6px; border: none; background: #151b24; color: white; font-size: 0.85rem; border: 1px solid #2f3b4c; }
+        .search-input { flex: 1; padding: 10px; border-radius: 6px; background: #151b24; color: white; font-size: 0.85rem; border: 1px solid #2f3b4c; }
         .search-btn { background: #ffbd59; color: #0b0c10; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-
         .req-list, .user-list-box { margin-top: 10px; max-height: 200px; overflow-y: auto; }
         .req-item, .user-item { background: #151b24; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.85rem; border: 1px solid #2f3b4c; }
         .req-actions { display: flex; gap: 8px; margin-top: 8px; }
@@ -78,7 +77,6 @@
 
 <div class="app-container">
     
-    <!-- USER UI -->
     <div id="user-ui" style="display: flex; flex-direction: column; flex: 1;">
         <div class="top-nav">
             <div class="nav-header">
@@ -89,120 +87,103 @@
                 </div>
             </div>
             <div class="nav-tabs">
-                <button class="tab-btn active" id="btn-home" onclick="switchScreen('home-screen', this)">Home</button>
-                <button class="tab-btn" id="btn-ads" onclick="switchScreen('ads-screen', this)">Ads</button>
+                <button class="tab-btn active" id="btn-ads" onclick="switchScreen('ads-screen', this)">Ads</button>
+                <button class="tab-btn" id="btn-home" onclick="switchScreen('home-screen', this)">Home</button>
                 <button class="tab-btn" id="btn-withdraw" onclick="switchScreen('withdraw-screen', this)">Withdraw</button>
                 <button class="tab-btn" id="btn-support" onclick="switchScreen('support-screen', this)">Support</button>
             </div>
         </div>
 
-        <!-- HOME SCREEN -->
-        <div id="home-screen" class="screen active">
-            <div class="id-badge">
-                🆔 Telegram ID: <span id="telegram-id-val">7154578421</span>
+        <div id="ads-screen" class="screen active">
+            <h3 id="txt-ads-header">📺 ማስታወቂያዎችን አይተው ይርብሁ</h3>
+            <div class="ad-box">
+                <div class="timer-banner" id="ad-timer-banner">እባክዎ ማስታወቂያው ላይ ለ 30 ሰከንድ ይቆዩ...</div>
+                <p style="margin-bottom: 15px; color: #fff;" id="txt-ad-reward">እያንዳንዱ ማስታወቂያ፡ 0.2 ብር ይከፍላል</p>
+                
+                <button class="main-btn" style="background: linear-gradient(135deg, #0088cc, #00a2ed); color: white;" onclick="watchAdsgram()" id="txt-gram-btn">🎬 ፈጣን የቪዲዮ ማስታወቂያ (0.2 ETB)</button>
+                <button class="main-btn" style="background: linear-gradient(135deg, #45f3ff, #00b4d8); color: #0b0c10;" onclick="watchAdsterra()" id="txt-watch-btn">🌐 ትልቅ ማስታወቂያ እይ (0.2 ETB)</button>
+                
+                <button class="main-btn" style="background-color: #ff9f0a; color: #0b0c10; display: none;" onclick="claimAdReward()" id="txt-claim-btn">💰 የቪዲዮ ክፍያህን ተቀበል</button>
+                
+                <div style="font-size: 0.85rem; color: #aaa; margin-top: 15px;"><span id="txt-ad-count-label">የዛሬው የቀረዎት ማስታወቂያ፦</span> <span id="ad-remaining">50</span>/50</div>
             </div>
+        </div>
 
+        <div id="home-screen" class="screen">
+            <div class="id-badge">🆔 Telegram ID: <span id="telegram-id-val">7154578421</span></div>
             <div class="wallet-box">
                 <span id="txt-balance">ያለዎት ሂሳብ (Balance)</span>
                 <div class="balance"><span id="user-balance">0.00</span> ETB</div>
             </div>
-            
             <div class="info-card" id="broadcast-display" style="display:none; background: #2a2005; border: 1px solid #ffbd59;">
                 <h4 style="color:#ffbd59; font-size:0.9rem;">📢 ከአስተዳዳሪው የተላከ መልዕክት፡</h4>
                 <p id="broadcast-text" style="font-size:0.85rem; margin-top:4px; color:#fff;"></p>
             </div>
-
             <div class="info-card">
                 <h3 id="txt-invite-title">👥 ሰው ጋብዘው ብር ያግኙ</h3>
-                <p style="font-size: 0.8rem; color:#a5a6a7; margin-bottom: 5px;" id="txt-invite-desc">የእርስዎን የግብዣ ሊንክ ለጓደኞችዎ በመላክ፣ እያንዳንዱ ሰው ሲቀላቀል 1 ብር ያግኙ!</p>
+                <p style="font-size: 0.8rem; color:#a5a6a7; margin-bottom: 5px;" id="txt-invite-desc">የእርስዎን የግብዣ ሊንክ ለጓደኞችዎ በመላክ፣ እያንዳንዱ ሰው ሲቀላቀልና 5 Ads ሲያይ 1 ብር ያግኙ!</p>
                 <div class="link-box">
                     <div class="link-text" id="invite-link-str">https://t.me/EthioAdsWatch_bot?start=7154578421</div>
                     <button class="copy-btn" onclick="copyLink()" id="txt-copy-btn">ኮፒ</button>
                 </div>
                 <div style="font-size: 0.9rem; color: #ffbd59; margin-top: 10px; text-align: center; font-weight: bold;">
-                    <span id="txt-invite-count-lbl">የጋበዙት ሰው ብዛት፦</span> <span id="invite-count">0</span> / 5
+                    <span id="txt-invite-count-lbl">የጋበዙት ሰው ብዛት፦</span> <span id="invite-count">0</span>
                 </div>
             </div>
         </div>
 
-        <!-- ADS SCREEN -->
-        <div id="ads-screen" class="screen">
-            <h3 id="txt-ads-header">📺 ማስታወቂያዎችን አይተው ይርብሁ</h3>
-            <div class="ad-box">
-                <p style="margin-bottom: 15px; color: #fff;" id="txt-ad-reward">እያንዳንዱ ማስታወቂያ፡ 0.3 ብር ይከፍላል</p>
-                <button class="main-btn" style="background-color: #45f3ff; box-shadow: 0 0 15px rgba(69,243,255,0.3);" onclick="watchAd()" id="txt-watch-btn">ማስታወቂያ እይ</button>
-                <div style="font-size: 0.85rem; color: #aaa; margin-top: 15px;"><span id="txt-ad-count-label">የዛሬው የቀረዎት ማስታወቂያ፦</span> <span id="ad-remaining">20</span>/20</div>
-            </div>
-        </div>
-
-        <!-- WITHDRAW SCREEN -->
         <div id="withdraw-screen" class="screen">
             <h3 id="txt-withdraw-header">💸 ገንዘብ ማውጫ (Withdraw)</h3>
             <div class="info-card">
                 <p style="font-size:0.8rem; margin-bottom:8px; color:#aaa;" id="txt-withdraw-limits">ደረጃ፦ አነስተኛ ማውጫ 50 ብር | ከፍተኛ ማውጫ 50 ብር</p>
                 <p style="font-size:0.8rem; margin-bottom:12px; color:#ffbd59; font-weight:bold;" id="txt-withdraw-reqs">መስፈርት፦ ገንዘብ ለማውጣት ቢያንስ 5 ሰው መጋበዝ አለብዎት!</p>
-                
                 <label style="font-size:0.85rem; color:#45f3ff; display:block; margin-bottom:5px;">የማውጫ መንገድ (Method)፦</label>
                 <select class="withdraw-select" id="withdraw-method">
                     <option value="Telebirr">Telebirr</option>
                     <option value="CBE">CBE (የኢትዮጵያ ንግድ ባንክ)</option>
                 </select>
-
                 <label style="font-size:0.85rem; color:#45f3ff; display:block; margin-bottom:5px;">የስልክ ወይም የሂሳብ ቁጥር (Account/Phone)፦</label>
                 <input type="text" class="withdraw-input" id="withdraw-account" placeholder="የባንክ አካውንት ወይም ስልክ ያስገቡ">
-                
                 <label style="font-size:0.85rem; color:#45f3ff; display:block; margin-bottom:5px;">የገንዘብ መጠን (Amount)፦</label>
-                <input type="number" class="withdraw-input" id="withdraw-amount" placeholder="የብር መጠን (ለምሳሌ 50)" value="50">
-                
-                <button class="main-btn" style="background-color: #ffbd59; color: #0b0c10; font-weight: bold; margin-top: 5px;" onclick="handleWithdraw()" id="txt-submit-withdraw">የማውጫ ጥያቄ ላክ</button>
+                <input type="number" class="withdraw-input" id="withdraw-amount" placeholder="የብር መጠን" value="50">
+                <button class="main-btn" style="background-color: #ffbd59; color: #0b0c10;" onclick="handleWithdraw()" id="txt-submit-withdraw">የማውጫ ጥያቄ ላክ</button>
             </div>
         </div>
 
-        <!-- SUPPORT SCREEN -->
         <div id="support-screen" class="screen">
             <h3 id="txt-support-header">📞 የቴክኒክ እርዳታ (Support)</h3>
             <div class="info-card" style="text-align: center; padding: 25px 15px;">
-                <p style="font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5; color: #fff;" id="txt-support-desc">ማንኛውም አይነት ችግር ወይም ጥያቄ ካጋጠመዎት ከታች ያለውን በተን በመንካት ዋናውን አስተዳዳሪ በቀጥታ ማግኘት ይችላሉ።</p>
+                <p style="font-size: 0.9rem; margin-bottom: 20px; color: #fff;" id="txt-support-desc">ማንኛውም አይነት ችግር ወይም ጥያቄ ካጋጠመዎት ከታች ያለውን በተን በመንካት ዋናውን አስተዳዳሪ በቀጥታ ማግኘት ይችላሉ።</p>
                 <button class="main-btn" style="background-color: #ffbd59; color: #0b0c10;" onclick="openSupportLink()" id="txt-support-btn">አስተዳዳሪውን አግኝ (Contact Owner)</button>
             </div>
         </div>
     </div>
 
-    <!-- CONTROL PANEL (ADMIN UI) -->
     <div id="admin-ui" class="admin-screen">
         <div class="admin-header">
             <h2 style="color: #ffbd59; font-size: 1.1rem;">Control Panel ⚙️</h2>
             <button class="close-admin-btn" onclick="closeAdmin()">ውጣ (Exit)</button>
         </div>
-
         <div class="stats-grid">
             <div class="stat-card">ጥያቄዎች (Pending)<div id="stat-pending">0</div></div>
             <div class="stat-card">ጠቅላላ ተከፈለ (Paid)<div id="stat-paid">0.00 ETB</div></div>
         </div>
-        
-        <!-- አጠቃላይ ተጠቃሚዎች ማሳያ ዳሽቦርድ -->
         <div class="stats-grid" style="grid-template-columns: 1fr;">
             <div class="stat-card" style="border-left-color: #45f3ff;">ጠቅላላ የተመዘገቡ ተጠቃሚዎች (Total Users)<div id="stat-total-users">1</div></div>
         </div>
-
         <div class="info-card" style="padding: 10px;">
-            <h4 style="font-size:0.85rem; color:#aaa; margin-bottom:8px;">🔍 ተጠቃሚ በ Telegram ID ፈልግ</h4>
             <div class="search-box">
                 <input type="text" class="search-input" id="admin-search-id" placeholder="የቴሌግราม ID ያስገቡ...">
                 <button class="search-btn" onclick="searchByTelegramId()">ፈልግ</button>
             </div>
         </div>
-
         <div class="info-card broadcast-box">
-            <h4 style="color: #45f3ff; margin-bottom: 5px; font-size:0.9rem;">📢 የብሮድካስት መልዕክት መላኪያ</h4>
-            <textarea id="broadcast-input" placeholder="የሚልኩትን መልዕክት እዚህ ይጻፉ..."></textarea>
+            <textarea id="broadcast-input" placeholder="የብሮድካስት መልዕክት..."></textarea>
             <button class="main-btn" style="background-color: #45f3ff; padding: 8px;" onclick="sendBroadcast()">መልዕክቱን ላክ</button>
         </div>
-
-        <h3 style="text-align: left; border-bottom: 1px solid #333; padding-bottom: 5px; font-size: 0.95rem;">📥 የገንዘብ ማውጫ ጥያቄዎች</h3>
+        <h3 style="text-align: left; font-size: 0.95rem;">📥 የገንዘብ ማውጫ ጥያቄዎች</h3>
         <div class="req-list" id="admin-req-list"></div>
-
-        <h3 style="text-align: left; border-bottom: 1px solid #333; padding-bottom: 5px; font-size: 0.95rem; margin-top: 15px;">👥 የተጠቃሚዎች መረጃና ዝርዝር</h3>
+        <h3 style="text-align: left; font-size: 0.95rem; margin-top: 15px;">👥 የተጠቃሚዎች መረጃና ዝርዝር</h3>
         <div class="user-list-box" id="admin-user-list"></div>
     </div>
 
@@ -215,12 +196,21 @@
     const BOT_TOKEN = "8529115333:AAHTitBmsAuF3y_cm5qPhpHS8V0Qp7us5B0";
     const ADMIN_CHAT_ID = "7154578421";
     const BOT_USERNAME = "EthioAdsWatch_bot";
+    const ADSGRAM_BLOCK_ID = "YOUR_ADSGRAM_BLOCK_ID"; 
 
     let myTelegramId = "7154578421"; 
-    
-    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-        myTelegramId = tg.initDataUnsafe.user.id.toString();
+    let referrerId = null;
+
+    // የሪፈራል ሊንክ መያዣ (Extract start parameter)
+    if (tg.initDataUnsafe) {
+        if (tg.initDataUnsafe.user) {
+            myTelegramId = tg.initDataUnsafe.user.id.toString();
+        }
+        if (tg.initDataUnsafe.start_param) {
+            referrerId = tg.initDataUnsafe.start_param.toString();
+        }
     }
+    
     document.getElementById("telegram-id-val").innerText = myTelegramId;
     document.getElementById("invite-link-str").innerText = `https://t.me/${BOT_USERNAME}?start=` + myTelegramId;
 
@@ -230,25 +220,49 @@
     let lastWatchDate = localStorage.getItem("lastWatchDate") || "";
     let inviteCount = parseInt(localStorage.getItem("userInviteCount")) || 0;
     let cooldownEndTime = parseInt(localStorage.getItem("cooldownEndTime")) || 0;
-    let cooldownInterval;
     let currentLang = localStorage.getItem("lang") || "am";
+    
+    let isAdActive = false;
+    let adTimer;
+    let currentRewardType = ""; 
 
     let pendingRequests = JSON.parse(localStorage.getItem("adminRequests")) || [];
     let totalPaidOut = parseFloat(localStorage.getItem("adminTotalPaid")) || 0.00;
     let currentBroadcast = localStorage.getItem("adminBroadcastText") || "";
-    
-    // የተጠቃሚዎች ዝርዝር ዳታቤዝ ሲስተም
     let globalUsers = JSON.parse(localStorage.getItem("globalUsersDatabase")) || {};
     
-    // የአሁኑን ተጠቃሚ ዳታ በየጊዜው መመዝገብ
+    // አዲስ ሰው ሲገባ መመዝገብ እና የሪፈራል ሊንክ ማረጋገጥ
     function syncUserData() {
-        globalUsers[myTelegramId] = {
-            tgId: myTelegramId,
-            bal: balance,
-            ads: adsWatchedToday,
-            invites: inviteCount,
-            lastSeen: new Date().toLocaleString()
-        };
+        if (!globalUsers[myTelegramId]) {
+            globalUsers[myTelegramId] = {
+                tgId: myTelegramId,
+                bal: balance,
+                ads: adsWatchedToday,
+                invites: inviteCount,
+                referredBy: referrerId,
+                hasCreditedReferrer: false, 
+                lastSeen: new Date().toLocaleString()
+            };
+        } else {
+            globalUsers[myTelegramId].bal = balance;
+            globalUsers[myTelegramId].ads = adsWatchedToday;
+            globalUsers[myTelegramId].invites = inviteCount;
+            globalUsers[myTelegramId].lastSeen = new Date().toLocaleString();
+        }
+        
+        // 🛑 ANTI-CHEAT CHECK: አዲሱ ሰው ቢያንስ 5 Ads ሲያይ ለጋበዘው ሰው 1 ብር መስጠት
+        let myData = globalUsers[myTelegramId];
+        if (myData.referredBy && !myData.hasCreditedReferrer && myData.ads >= 5) {
+            let refId = myData.referredBy;
+            if (globalUsers[refId]) {
+                globalUsers[refId].bal += 1.00; // 1 ብር ሽልማት
+                globalUsers[refId].invites += 1;
+                myData.hasCreditedReferrer = true;
+                
+                // ለጋበዘው ሰው ቴሌግራም ላይ ማሳወቂያ መላክ
+                sendTelegramNotificationToUser(refId, `👥 አዲስ ሰው በተሳካ ሁኔታ ጋብዘዋል! የተጋበዘው ሰው 5 Ads ስለተመለከተ 1.00 ETB ወደ አካውንትዎ ገብቷል።`);
+            }
+        }
         localStorage.setItem("globalUsersDatabase", JSON.stringify(globalUsers));
     }
     syncUserData();
@@ -264,36 +278,33 @@
     const textData = {
         am: {
             bal: "ያለዎት ሂሳብ (Balance)", inviteTitle: "👥 ሰው ጋብዘው ብር ያግኙ",
-            inviteDesc: "የእርስዎን የግብዣ ሊንክ ለጓደኞችዎ በመላክ፣ እያንዳንዱ ሰው ሲቀላቀል 1 ብር ያግኙ!",
-            copy: "ኮፒ", adsH: "📺 ማስታወቂያዎችን አይተው ይርብሁ", adRew: "እያንዳንዱ ማስታወቂያ፡ 0.3 ብር ይከፍላል",
-            watch: "ማስታወቂያ እይ", remLabel: "የዛሬው የቀረዎት ማስታወቂያ፦", withdrawH: "💸 ገንዘብ ማውጫ (Withdraw)",
+            inviteDesc: "የእርስዎን የግብዣ ሊንክ ለጓደኞችዎ በመላክ፣ እያንዳንዱ ሰው ሲቀላቀልና 5 Ads ሲያይ 1 ብር ያግኙ!",
+            copy: "ኮፒ", adsH: "📺 ማስታወቂያዎችን አይተው ይርብሁ",
+            remLabel: "የዛሬው የቀረዎት ማስታወቂያ፦", withdrawH: "💸 ገንዘብ ማውጫ (Withdraw)",
             limits: "ደረጃ፦ አነስተኛ ማውጫ 50 ብር | ከፍተኛ ማውጫ 50 ብር", phonePlace: "የባንክ አካውንት ወይም ስልክ ያስገቡ",
             submitW: "የማውጫ ጥያቄ ላክ", invLbl: "የጋበዙት ሰው ብዛት፦", reqs: "መስፈርት፦ ገንዘብ ለማውጣት ቢያንስ 5 ሰው መጋበዝ አለብዎት!",
-            copied: "ሊንኩ በተሳካ ሁኔታ ኮፒ ሆኗል!", noAds: "ይቅርታ! ለዛሬ የተፈቀደልዎ 20 ማስታወቂያ ጨርሰዋል። ነገ ይመለሱ!",
-            watching: "ማስታወቂያ በመታየት ላይ ነው...", successAd: "የማስታወቂያ ክፍያ 0.3 ብር ተጨምሮልዎታል!",
+            copied: "ሊንኩ በተሳካ ሁኔታ ኮፒ ሆኗል!", noAds: "ይቅርታ! ለዛሬ የተፈቀደልዎ 50 ማስታወቂያ ጨርሰዋል። ነገ ይመለሱ!",
+            successAd: "የማስታወቂያ ክፍያ 0.20 ብር በተሳካ ሁኔታ ተጨምሮልዎታል!",
             lowBal: "ይቅርታ! ማውጣት የሚቻለው ቢያንስ 50 ብር ሲኖርዎት ብቻ ነው!", invalidPhone: "እባክዎ ትክክለኛ የሂሳብ/ስልክ ቁጥር ያስገቡ!",
-            lowInvites: "ይቅርታ! ማውጣት የሚቻለው ቢያንስ 5 ሰው ሲገብዙ ብቻ ነው። የጋበዙት፦ ", sentReq: "የማውጫ ጥያቄዎ በ Control Panel ላይ ተመዝግቧል!",
-            supportH: "📞 የቴክኒክ እርዳታ (Support)", supportDesc: "ማንኛውም አይነት ችግር ወይም ጥያቄ ካጋጠመዎት ከታች ያለውን በተን በመንካት ዋናውን አስተዳዳሪ በቀጥታ ማግኘት ይችላሉ።",
-            supportBtn: "አስተዳዳሪውን አግኝ (Contact Owner)"
+            lowInvites: "ይቅርታ! ማውጣት የሚቻለው ቢያንስ 5 ሰው ሲገብዙ ብቻ ነው።", sentReq: "የማውጫ ጥያቄዎ በ Control Panel ላይ ተመዝግቧል!",
+            supportH: "📞 የቴክኒክ እርዳታ (Support)", supportDesc: "ማንኛውም አይነት ችግር ወይም ጥያቄ ካጋጠመዎት ከአስተዳዳሪው ጋር ይገናኙ።", supportBtn: "አስተዳዳሪውን አግኝ"
         },
         en: {
             bal: "Your Balance", inviteTitle: "👥 Invite & Earn",
-            inviteDesc: "Share your invite link with friends, and earn 1 ETB for each successful sign up!",
-            copy: "Copy", adsH: "📺 Watch Ads & Earn Money", adRew: "Each ad pays: 0.3 ETB",
-            watch: "Watch Ad", remLabel: "Remaining ads today:", withdrawH: "💸 Withdraw Money",
+            inviteDesc: "Share your invite link, and earn 1 ETB after they complete 5 ads!",
+            copy: "Copy", adsH: "📺 Watch Ads & Earn Money",
+            remLabel: "Remaining ads today:", withdrawH: "💸 Withdraw Money",
             limits: "Limits: Minimum 50 ETB | Maximum 50 ETB", phonePlace: "Enter Account or Phone Number",
             submitW: "Submit Withdraw Request", invLbl: "Invited Users:", reqs: "Requirement: You must invite at least 5 people to withdraw!",
-            copied: "Link copied to clipboard!", noAds: "Sorry! You have reached today's limit of 20 ads. Come back tomorrow!",
-            watching: "Loading ad... please wait", successAd: "0.3 ETB added to your balance!",
+            copied: "Link copied!", noAds: "Sorry! You have reached today's limit of 50 ads.",
+            successAd: "Reward 0.20 ETB added successfully!",
             lowBal: "Sorry! You need at least 50 ETB to withdraw!", invalidPhone: "Please enter a valid Account/Phone number!",
-            lowInvites: "Sorry! You must invite at least 5 people to withdraw. Current: ", sentReq: "Your request has been saved to Control Panel!",
-            supportH: "📞 Technical Support", supportDesc: "If you face any issues or have questions, click the button below to message the admin directly.",
-            supportBtn: "Contact Owner"
+            lowInvites: "Sorry! You must invite at least 5 people.", sentReq: "Your request has been saved!",
+            supportH: "📞 Technical Support", supportDesc: "Contact the admin for any issues.", supportBtn: "Contact Owner"
         }
     };
 
     function updateUI() {
-        // ከሌላ ቦታ ሪሴት ከተደረገ ዳታን በየጊዜው ማረጋገጥ
         globalUsers = JSON.parse(localStorage.getItem("globalUsersDatabase")) || {};
         if (globalUsers[myTelegramId]) {
             balance = globalUsers[myTelegramId].bal;
@@ -302,7 +313,7 @@
         }
 
         document.getElementById("user-balance").innerText = balance.toFixed(2);
-        document.getElementById("ad-remaining").innerText = (20 - adsWatchedToday);
+        document.getElementById("ad-remaining").innerText = (50 - adsWatchedToday);
         document.getElementById("invite-count").innerText = inviteCount;
         
         let t = textData[currentLang];
@@ -311,8 +322,6 @@
         document.getElementById("txt-invite-desc").innerText = t.inviteDesc;
         document.getElementById("txt-copy-btn").innerText = t.copy;
         document.getElementById("txt-ads-header").innerText = t.adsH;
-        document.getElementById("txt-ad-reward").innerText = t.adRew;
-        document.getElementById("txt-watch-btn").innerText = t.watch;
         document.getElementById("txt-ad-count-label").innerText = t.remLabel;
         document.getElementById("txt-withdraw-header").innerText = t.withdrawH;
         document.getElementById("txt-withdraw-limits").innerText = t.limits;
@@ -350,41 +359,89 @@
     function checkCooldown() {
         let now = Date.now();
         let watchBtn = document.getElementById("txt-watch-btn");
-        if (cooldownEndTime > now) {
+        let gramBtn = document.getElementById("txt-gram-btn");
+        if (cooldownEndTime > now && !isAdActive) {
             watchBtn.disabled = true;
-            clearInterval(cooldownInterval);
-            cooldownInterval = setInterval(() => {
-                let timeLeft = Math.ceil((cooldownEndTime - Date.now()) / 1000);
-                if (timeLeft <= 0) {
-                    clearInterval(cooldownInterval);
-                    watchBtn.disabled = false;
-                    watchBtn.innerText = textData[currentLang].watch;
-                } else {
-                    watchBtn.innerText = currentLang === 'am' ? `እባክዎ ይጠብቁ (${timeLeft}ሰ)` : `Please wait (${timeLeft}s)`;
-                }
-            }, 1000);
-        } else {
+            gramBtn.disabled = true;
+            let timeLeft = Math.ceil((cooldownEndTime - Date.now()) / 1000);
+            watchBtn.innerText = currentLang === 'am' ? `እባክዎ ይጠብቁ (${timeLeft}ሰ)` : `Please wait (${timeLeft}s)`;
+        } else if (!isAdActive) {
             watchBtn.disabled = false;
+            gramBtn.disabled = false;
+            watchBtn.innerText = "🌐 ትልቅ ማስታወቂያ እይ (0.2 ETB)";
         }
     }
 
-    function watchAd() {
+    // 🌐 ADSTERRA ማስታወቂያ - 30 ሰከንድ ቆጣሪ መጀመሪያ ማስጀመር
+    function watchAdsterra() {
         let t = textData[currentLang];
-        if (adsWatchedToday >= 20) { alert(t.noAds); return; }
+        if (adsWatchedToday >= 50) { alert(t.noAds); return; }
         
-        // ያንቺ እውነተኛ የ Adsterra Smartlink እዚህ ተተክሏል
+        // ማስታወቂያውን በሌላ ዊንዶው መክፈት
         window.open('https://www.effectivecpmnetwork.com/nbt9fxui?key=617f0ed39b674c51eb4ad651576242a6', '_blank');
+        
+        startAdTimer("adsterra");
+    }
 
-        balance += 0.30;
+    // 🎬 ADSGRAM ማስታወቂያ
+    function watchAdsgram() {
+        let t = textData[currentLang];
+        if (adsWatchedToday >= 50) { alert(t.noAds); return; }
+
+        if (ADSGRAM_BLOCK_ID === "YOUR_ADSGRAM_BLOCK_ID") {
+            alert(currentLang === 'am' ? "🎬 ይህ ፈጣን ማስታወቂያ በቅርቡ 2000 አባላት ሲሞሉ ይጀምራል! እባክዎ 'ትልቅ ማስታወቂያ' የሚለውን ይጠቀሙ።" : "🎬 This feature unlocks at 2000 members! Please use 'Watch Ad' button.");
+            return;
+        }
+
+        startAdTimer("adsgram");
+    }
+
+    // የ 30 ሰከንድ ሰዓት መቁጠሪያ ህግ (Ads Watch Timer Rule)
+    function startAdTimer(type) {
+        isAdActive = true;
+        currentRewardType = type;
+        
+        document.getElementById("txt-watch-btn").style.display = "none";
+        document.getElementById("txt-gram-btn").style.display = "none";
+        document.getElementById("ad-timer-banner").style.display = "block";
+        document.getElementById("txt-claim-btn").style.display = "none";
+
+        let timeLeft = 30;
+        document.getElementById("ad-timer-banner").innerText = currentLang === 'am' ? `እባክዎ ማስታወቂያው ላይ ለ ${timeLeft} ሰከንድ ይቆዩ...` : `Please stay on the ad for ${timeLeft}s...`;
+
+        clearInterval(adTimer);
+        adTimer = setInterval(() => {
+            timeLeft--;
+            if (timeLeft <= 0) {
+                clearInterval(adTimer);
+                document.getElementById("ad-timer-banner").style.display = "none";
+                document.getElementById("txt-claim-btn").style.display = "block"; // የክፍያ በተን ማሳየት
+            } else {
+                document.getElementById("ad-timer-banner").innerText = currentLang === 'am' ? `እባክዎ ማስታወቂያው ላይ ለ ${timeLeft} ሰከንድ ይቆዩ...` : `Please stay on the ad for ${timeLeft}s...`;
+            }
+        }, 1000);
+    }
+
+    // 💰 30 ሰከንድ ሙሉ በሙሉ ሲያልቅ ክፍያ መቀበያ
+    function claimAdReward() {
+        if (!isAdActive) return;
+
+        balance += 0.20; // 0.2 ብር ክፍያ
         adsWatchedToday++;
-        cooldownEndTime = Date.now() + (30 * 1000);
+        cooldownEndTime = Date.now() + (10 * 1000); // 10 ሰከንድ እረፍት
+        
         localStorage.setItem("appBalance", balance);
         localStorage.setItem("adsWatchedCount", adsWatchedToday);
         localStorage.setItem("cooldownEndTime", cooldownEndTime);
         
+        isAdActive = false;
+        document.getElementById("txt-claim-btn").style.display = "none";
+        document.getElementById("txt-watch-btn").style.display = "block";
+        document.getElementById("txt-gram-btn").style.display = "block";
+        
         syncUserData();
         updateUI();
-        alert(t.successAd);
+        alert(textData[currentLang].successAd);
     }
 
     function copyLink() {
@@ -392,13 +449,16 @@
         navigator.clipboard.writeText(textToCopy).then(() => { alert(textData[currentLang].copied); });
     }
 
-    function openSupportLink() {
-        window.open("https://t.me/hayle58", "_blank");
-    }
+    function openSupportLink() { window.open("https://t.me/hayle58", "_blank"); }
 
     function sendTelegramNotification(msg) {
         let url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_CHAT_ID}&text=${encodeURIComponent(msg)}`;
-        fetch(url).then(res => console.log("Notified")).catch(err => console.error(err));
+        fetch(url).catch(err => console.error(err));
+    }
+
+    function sendTelegramNotificationToUser(userId, msg) {
+        let url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${userId}&text=${encodeURIComponent(msg)}`;
+        fetch(url).catch(err => console.error(err));
     }
 
     function handleWithdraw() {
@@ -407,7 +467,7 @@
         let account = document.getElementById("withdraw-account").value;
         let amountInput = parseFloat(document.getElementById("withdraw-amount").value);
 
-        if (inviteCount < 5) { alert(t.lowInvites + inviteCount); return; }
+        if (inviteCount < 5) { alert(t.lowInvites); return; }
         if (balance < amountInput || amountInput < 50.00) { alert(t.lowBal); return; }
         if (account.trim() === "" || account.length < 8) { alert(t.invalidPhone); return; }
 
@@ -423,7 +483,7 @@
         pendingRequests.push(newRequest);
         localStorage.setItem("adminRequests", JSON.stringify(pendingRequests));
 
-        let alertMessage = `📥 አዲስ የማውጫ ጥያቄ!\n\n👤 ID: ${myTelegramId}\n🏦 መንገድ: ${method}\n💳 አካውንት/ስልክ: ${account}\n💰 መጠን: ${amountInput.toFixed(2)} ETB`;
+        let alertMessage = `📥 አዲስ የማውጫ ጥያቄ!\n\n👤 ID: ${myTelegramId}\n🏦 መንገድ: ${method}\n💳 አካውንት: ${account}\n💰 መጠን: ${amountInput.toFixed(2)} ETB`;
         sendTelegramNotification(alertMessage);
 
         balance -= amountInput;
@@ -431,21 +491,18 @@
         
         syncUserData();
         updateUI();
-        
         document.getElementById("withdraw-account").value = "";
         alert(t.sentReq);
     }
 
-    // ================= CONTROL PANEL FUNCTIONS =================
+    // Admin UI
     function askAdminAccess() {
         let password = prompt("የ Control Panel የሚስጥር ቁጥር ያስገቡ፦");
         if (password === "070322") { 
             document.getElementById("user-ui").style.display = "none";
             document.getElementById("admin-ui").classList.add("active");
             renderAdminPanel();
-        } else if (password !== null) {
-            alert("የተሳሳተ የሚስጥር ቁጥር ነው!");
-        }
+        } else if (password !== null) { alert("የተሳሳተ የሚስጥር ቁጥር ነው!"); }
     }
 
     function closeAdmin() {
@@ -462,19 +519,18 @@
         document.getElementById("stat-paid").innerText = totalPaidOut.toFixed(2) + " ETB";
         document.getElementById("stat-total-users").innerText = userKeys.length;
 
-        // 1. የገንዘብ ማውጫ ጥያቄዎችን ማሳየት
         let listContainer = document.getElementById("admin-req-list");
         listContainer.innerHTML = "";
         if (pendingRequests.length === 0) {
-            listContainer.innerHTML = "<p style='color:#aaa; text-align:center; font-size:0.85rem;'>ምንም አዲስ ጥያቄ የለም።</p>";
+            listContainer.innerHTML = "<p style='color:#aaa; text-align:center;'>ምንም አዲስ ጥያቄ የለም።</p>";
         } else {
             pendingRequests.forEach(req => {
                 let item = document.createElement("div");
                 item.className = "req-item";
                 item.innerHTML = `
                     <div><strong>ID፦</strong> ${req.tgId}</div>
-                    <div><strong>መንገድ፦</strong> ${req.method} | <strong>አካውንት፦</strong> ${req.account}</div>
-                    <div><strong>መጠን፦</strong> ${req.amount.toFixed(2)} ETB</div>
+                    <div><strong>መንገድ:</strong> ${req.method} | <strong>አካውንት:</strong> ${req.account}</div>
+                    <div><strong>መጠን:</strong> ${req.amount.toFixed(2)} ETB</div>
                     <div class="req-actions">
                         <button class="action-btn approve-btn" onclick="approveRequest(${req.id})">✔️ አጽድቅ</button>
                         <button class="action-btn reject-btn" onclick="rejectRequest(${req.id})">❌ ሰርዝ</button>
@@ -484,16 +540,9 @@
             });
         }
 
-        // 2. የተጠቃሚዎች መረጃ ዝርዝር እና Reset ማድረጊያ ማሳያ
         let userListContainer = document.getElementById("admin-user-list");
         userListContainer.innerHTML = "";
-        
         let usersToDisplay = filteredUsers ? filteredUsers : userKeys;
-        
-        if (usersToDisplay.length === 0) {
-            userListContainer.innerHTML = "<p style='color:#aaa; text-align:center; font-size:0.85rem;'>ምንም ተጠቃሚ አልተገኘም።</p>";
-            return;
-        }
 
         usersToDisplay.forEach(key => {
             let u = globalUsers[key];
@@ -501,11 +550,9 @@
             let uItem = document.createElement("div");
             uItem.className = "user-item";
             uItem.innerHTML = `
-                <div><strong>👤 Telegram ID:</strong> <span style="color:#45f3ff;">${u.tgId}</span></div>
-                <div><strong>💰 በኪስ ያለው ብር:</strong> ${u.bal.toFixed(2)} ETB</div>
-                <div><strong>📺 ያያቸው ማስታወቂያዎች:</strong> ${u.ads} / 20</div>
-                <div><strong>👥 የጋበዛቸው ሰዎች:</strong> ${u.invites}</div>
-                <div><small style="color:#666;">የመጨረሻ እንቅስቃሴ: ${u.lastSeen || 'ያልታወቀ'}</small></div>
+                <div><strong>👤 Telegram ID:</strong> ${u.tgId}</div>
+                <div><strong>💰 ብር:</strong> ${u.bal.toFixed(2)} ETB | <strong>📺 Ads:</strong> ${u.ads}/50</div>
+                <div><strong>👥 የጋበዛቸው:</strong> ${u.invites}</div>
                 <button class="reset-btn" onclick="resetUserAccount('${u.tgId}')">🔄 Reset User Account</button>
             `;
             userListContainer.appendChild(uItem);
@@ -515,33 +562,25 @@
     function searchByTelegramId() {
         let searchId = document.getElementById("admin-search-id").value.trim();
         globalUsers = JSON.parse(localStorage.getItem("globalUsersDatabase")) || {};
-        if (searchId === "") {
-            renderAdminPanel();
-            return;
-        }
+        if (searchId === "") { renderAdminPanel(); return; }
         let filtered = Object.keys(globalUsers).filter(key => key.includes(searchId));
         renderAdminPanel(filtered);
     }
 
-    // አካውንት መርጦ ሪሴት (Reset) ማድረጊያ ፈንክሽን
     function resetUserAccount(tgId) {
-        if (confirm(`እርግጠኛ ነህ የዚህን ተጠቃሚ (${tgId}) አካውንት ሙሉ በሙሉ ማጥፋት (Reset ማድረግ) ትፈልጋለህ?`)) {
+        if (confirm(`የተጠቃሚ ${tgId} አካውንት ሙሉ በሙሉ Reset ይሁን?`)) {
             globalUsers = JSON.parse(localStorage.getItem("globalUsersDatabase")) || {};
             if (globalUsers[tgId]) {
                 globalUsers[tgId].bal = 0.00;
                 globalUsers[tgId].ads = 0;
                 globalUsers[tgId].invites = 0;
                 localStorage.setItem("globalUsersDatabase", JSON.stringify(globalUsers));
-                
                 if (tgId === myTelegramId) {
-                    balance = 0.00;
-                    adsWatchedToday = 0;
-                    inviteCount = 0;
+                    balance = 0.00; adsWatchedToday = 0; inviteCount = 0;
                     localStorage.setItem("appBalance", 0.00);
                     localStorage.setItem("adsWatchedCount", 0);
-                    localStorage.setItem("userInviteCount", 0);
                 }
-                alert(`የተጠቃሚ ${tgId} መረጃ በተሳካ ሁኔታ Reset ሆኗል!`);
+                alert("ተሳክቷል!");
                 renderAdminPanel();
             }
         }
@@ -554,7 +593,6 @@
             localStorage.setItem("adminTotalPaid", totalPaidOut);
             pendingRequests.splice(reqIndex, 1);
             localStorage.setItem("adminRequests", JSON.stringify(pendingRequests));
-            alert("ጥያቄው በ Control Panel ጸድቋል!");
             renderAdminPanel();
         }
     }
@@ -564,7 +602,6 @@
         if (reqIndex > -1) {
             pendingRequests.splice(reqIndex, 1);
             localStorage.setItem("adminRequests", JSON.stringify(pendingRequests));
-            alert("ጥያቄው ውድቅ ተደርጓል።");
             renderAdminPanel();
         }
     }
@@ -573,7 +610,7 @@
         let input = document.getElementById("broadcast-input").value;
         currentBroadcast = input;
         localStorage.setItem("adminBroadcastText", currentBroadcast);
-        alert("የብሮድካስት መልዕክቱ ተልኳል!");
+        alert("ተልኳል!");
         document.getElementById("broadcast-input").value = "";
     }
 
