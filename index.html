@@ -6,7 +6,6 @@
     <title>Ethio Ads Watch</title>
     <!-- የቴሌግራም ዌብ አፕ ስክሪፕት -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://alwingulla.com/zone/xxxxxx" data-zone="1234567" async data-cfasync="false"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0b0c10; color: #c5c6c7; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
@@ -58,19 +57,20 @@
         .close-admin-btn { background: #ff3b30; color: white; border: none; padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
         
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-card { background: #151b24; border-left: 4px solid #ffbd59; padding: 10px; border-radius: 6px; text-align: center; }
-        .stat-card div { font-size: 1.2rem; font-weight: bold; color: #45f3ff; }
+        .stat-card { background: #151b24; border-left: 4px solid #ffbd59; padding: 10px; border-radius: 6px; text-align: center; font-size: 0.8rem; }
+        .stat-card div { font-size: 1.1rem; font-weight: bold; color: #45f3ff; }
         
         .search-box { display: flex; gap: 5px; margin-bottom: 15px; }
         .search-input { flex: 1; padding: 10px; border-radius: 6px; border: none; background: #151b24; color: white; font-size: 0.85rem; border: 1px solid #2f3b4c; }
         .search-btn { background: #ffbd59; color: #0b0c10; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-        .req-list { margin-top: 10px; }
-        .req-item { background: #151b24; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.85rem; border: 1px solid #2f3b4c; }
+        .req-list, .user-list-box { margin-top: 10px; max-height: 200px; overflow-y: auto; }
+        .req-item, .user-item { background: #151b24; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.85rem; border: 1px solid #2f3b4c; }
         .req-actions { display: flex; gap: 8px; margin-top: 8px; }
         .action-btn { flex: 1; padding: 6px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
         .approve-btn { background-color: #45f3ff; color: #0b0c10; }
         .reject-btn { background-color: #ff3b30; color: white; }
+        .reset-btn { background-color: #ff9f0a; color: #0b0c10; margin-top: 5px; width: 100%; padding: 5px; font-weight: bold; border-radius: 4px; border: none; cursor: pointer; }
         .broadcast-box textarea { width: 100%; height: 60px; background: #0b0c10; color: white; border: 1px solid #2f3b4c; border-radius: 6px; padding: 8px; font-size: 0.85rem; resize: none; margin-bottom: 8px; }
     </style>
 </head>
@@ -177,7 +177,12 @@
 
         <div class="stats-grid">
             <div class="stat-card">ጥያቄዎች (Pending)<div id="stat-pending">0</div></div>
-            <div class="stat-card">ጠቅላላ የተከፈለ (Paid)<div id="stat-paid">0.00 ETB</div></div>
+            <div class="stat-card">ጠቅላላ ተከፈለ (Paid)<div id="stat-paid">0.00 ETB</div></div>
+        </div>
+        
+        <!-- አጠቃላይ ተጠቃሚዎች ማሳያ ዳሽቦርድ -->
+        <div class="stats-grid" style="grid-template-columns: 1fr;">
+            <div class="stat-card" style="border-left-color: #45f3ff;">ጠቅላላ የተመዘገቡ ተጠቃሚዎች (Total Users)<div id="stat-total-users">1</div></div>
         </div>
 
         <div class="info-card" style="padding: 10px;">
@@ -194,8 +199,11 @@
             <button class="main-btn" style="background-color: #45f3ff; padding: 8px;" onclick="sendBroadcast()">መልዕክቱን ላክ</button>
         </div>
 
-        <h3 style="text-align: left; border-bottom: 1px solid #333; padding-bottom: 5px; font-size: 1rem;">📥 የጥያቄዎች ዝርዝር</h3>
+        <h3 style="text-align: left; border-bottom: 1px solid #333; padding-bottom: 5px; font-size: 0.95rem;">📥 የገንዘብ ማውጫ ጥያቄዎች</h3>
         <div class="req-list" id="admin-req-list"></div>
+
+        <h3 style="text-align: left; border-bottom: 1px solid #333; padding-bottom: 5px; font-size: 0.95rem; margin-top: 15px;">👥 የተጠቃሚዎች መረጃና ዝርዝር</h3>
+        <div class="user-list-box" id="admin-user-list"></div>
     </div>
 
 </div>
@@ -216,6 +224,7 @@
     document.getElementById("telegram-id-val").innerText = myTelegramId;
     document.getElementById("invite-link-str").innerText = `https://t.me/${BOT_USERNAME}?start=` + myTelegramId;
 
+    // DATA LOADING
     let balance = parseFloat(localStorage.getItem("appBalance")) || 0.00;
     let adsWatchedToday = parseInt(localStorage.getItem("adsWatchedCount")) || 0;
     let lastWatchDate = localStorage.getItem("lastWatchDate") || "";
@@ -227,12 +236,29 @@
     let pendingRequests = JSON.parse(localStorage.getItem("adminRequests")) || [];
     let totalPaidOut = parseFloat(localStorage.getItem("adminTotalPaid")) || 0.00;
     let currentBroadcast = localStorage.getItem("adminBroadcastText") || "";
+    
+    // የተጠቃሚዎች ዝርዝር ዳታቤዝ ሲስተም
+    let globalUsers = JSON.parse(localStorage.getItem("globalUsersDatabase")) || {};
+    
+    // የአሁኑን ተጠቃሚ ዳታ በየጊዜው መመዝገብ
+    function syncUserData() {
+        globalUsers[myTelegramId] = {
+            tgId: myTelegramId,
+            bal: balance,
+            ads: adsWatchedToday,
+            invites: inviteCount,
+            lastSeen: new Date().toLocaleString()
+        };
+        localStorage.setItem("globalUsersDatabase", JSON.stringify(globalUsers));
+    }
+    syncUserData();
 
     let todayStr = new Date().toDateString();
     if (lastWatchDate !== todayStr) {
         adsWatchedToday = 0;
         localStorage.setItem("adsWatchedCount", 0);
         localStorage.setItem("lastWatchDate", todayStr);
+        syncUserData();
     }
 
     const textData = {
@@ -267,6 +293,14 @@
     };
 
     function updateUI() {
+        // ከሌላ ቦታ ሪሴት ከተደረገ ዳታን በየጊዜው ማረጋገጥ
+        globalUsers = JSON.parse(localStorage.getItem("globalUsersDatabase")) || {};
+        if (globalUsers[myTelegramId]) {
+            balance = globalUsers[myTelegramId].bal;
+            adsWatchedToday = globalUsers[myTelegramId].ads;
+            inviteCount = globalUsers[myTelegramId].invites;
+        }
+
         document.getElementById("user-balance").innerText = balance.toFixed(2);
         document.getElementById("ad-remaining").innerText = (20 - adsWatchedToday);
         document.getElementById("invite-count").innerText = inviteCount;
@@ -300,6 +334,7 @@
     }
 
     function switchScreen(screenId, btn) {
+        updateUI();
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
@@ -337,11 +372,8 @@
         let t = textData[currentLang];
         if (adsWatchedToday >= 20) { alert(t.noAds); return; }
         
-        if (typeof show_8543921 === 'function') {
-            show_8543921();
-        } else {
-            window.open('https://www.highratecpm.com/wceb6df0m?key=03ccb60f15764d858348d5eb56e8b4bb', '_blank');
-        }
+        // ያንቺ እውነተኛ የ Adsterra Smartlink እዚህ ተተክሏል
+        window.open('https://www.effectivecpmnetwork.com/nbt9fxui?key=617f0ed39b674c51eb4ad651576242a6', '_blank');
 
         balance += 0.30;
         adsWatchedToday++;
@@ -349,6 +381,8 @@
         localStorage.setItem("appBalance", balance);
         localStorage.setItem("adsWatchedCount", adsWatchedToday);
         localStorage.setItem("cooldownEndTime", cooldownEndTime);
+        
+        syncUserData();
         updateUI();
         alert(t.successAd);
     }
@@ -359,7 +393,6 @@
     }
 
     function openSupportLink() {
-        // ወደ ባለቤቱ የቴሌግራም አካውንት በቀጥታ የሚወስድ ሊንክ
         window.open("https://t.me/hayle58", "_blank");
     }
 
@@ -395,6 +428,8 @@
 
         balance -= amountInput;
         localStorage.setItem("appBalance", balance);
+        
+        syncUserData();
         updateUI();
         
         document.getElementById("withdraw-account").value = "";
@@ -407,7 +442,7 @@
         if (password === "070322") { 
             document.getElementById("user-ui").style.display = "none";
             document.getElementById("admin-ui").classList.add("active");
-            renderAdminPanel(pendingRequests);
+            renderAdminPanel();
         } else if (password !== null) {
             alert("የተሳሳተ የሚስጥር ቁጥር ነው!");
         }
@@ -419,44 +454,97 @@
         updateUI();
     }
 
-    function renderAdminPanel(reqArray) {
+    function renderAdminPanel(filteredUsers = null) {
+        globalUsers = JSON.parse(localStorage.getItem("globalUsersDatabase")) || {};
+        let userKeys = Object.keys(globalUsers);
+        
         document.getElementById("stat-pending").innerText = pendingRequests.length;
         document.getElementById("stat-paid").innerText = totalPaidOut.toFixed(2) + " ETB";
+        document.getElementById("stat-total-users").innerText = userKeys.length;
 
+        // 1. የገንዘብ ማውጫ ጥያቄዎችን ማሳየት
         let listContainer = document.getElementById("admin-req-list");
         listContainer.innerHTML = "";
+        if (pendingRequests.length === 0) {
+            listContainer.innerHTML = "<p style='color:#aaa; text-align:center; font-size:0.85rem;'>ምንም አዲስ ጥያቄ የለም።</p>";
+        } else {
+            pendingRequests.forEach(req => {
+                let item = document.createElement("div");
+                item.className = "req-item";
+                item.innerHTML = `
+                    <div><strong>ID፦</strong> ${req.tgId}</div>
+                    <div><strong>መንገድ፦</strong> ${req.method} | <strong>አካውንት፦</strong> ${req.account}</div>
+                    <div><strong>መጠን፦</strong> ${req.amount.toFixed(2)} ETB</div>
+                    <div class="req-actions">
+                        <button class="action-btn approve-btn" onclick="approveRequest(${req.id})">✔️ አጽድቅ</button>
+                        <button class="action-btn reject-btn" onclick="rejectRequest(${req.id})">❌ ሰርዝ</button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
 
-        if (reqArray.length === 0) {
-            listContainer.innerHTML = "<p style='color:#aaa; text-align:center; font-size:0.9rem;'>ምንም አዲስ ጥያቄ በ Control Panel ላይ የለም።</p>";
+        // 2. የተጠቃሚዎች መረጃ ዝርዝር እና Reset ማድረጊያ ማሳያ
+        let userListContainer = document.getElementById("admin-user-list");
+        userListContainer.innerHTML = "";
+        
+        let usersToDisplay = filteredUsers ? filteredUsers : userKeys;
+        
+        if (usersToDisplay.length === 0) {
+            userListContainer.innerHTML = "<p style='color:#aaa; text-align:center; font-size:0.85rem;'>ምንም ተጠቃሚ አልተገኘም።</p>";
             return;
         }
 
-        reqArray.forEach(req => {
-            let item = document.createElement("div");
-            item.className = "req-item";
-            item.innerHTML = `
-                <div><strong>Telegram ID፦</strong> <span style="color:#45f3ff; font-weight:bold;">${req.tgId}</span></div>
-                <div><strong>የማውጫ መንገድ፦</strong> <span style="color:#ffbd59;">${req.method}</span></div>
-                <div><strong>አካውንት/ስልክ፦</strong> <span style="color:#fff; font-weight:bold;">${req.account}</span></div>
-                <div><strong>የገንዘብ መጠን፦</strong> ${req.amount.toFixed(2)} ETB</div>
-                <div><strong>ቀን፦</strong> ${req.date}</div>
-                <div class="req-actions">
-                    <button class="action-btn approve-btn" onclick="approveRequest(${req.id})">✔️ አጽድቅ (Approve)</button>
-                    <button class="action-btn reject-btn" onclick="rejectRequest(${req.id})">❌ ሰርዝ (Reject)</button>
-                </div>
+        usersToDisplay.forEach(key => {
+            let u = globalUsers[key];
+            if(!u) return;
+            let uItem = document.createElement("div");
+            uItem.className = "user-item";
+            uItem.innerHTML = `
+                <div><strong>👤 Telegram ID:</strong> <span style="color:#45f3ff;">${u.tgId}</span></div>
+                <div><strong>💰 በኪስ ያለው ብር:</strong> ${u.bal.toFixed(2)} ETB</div>
+                <div><strong>📺 ያያቸው ማስታወቂያዎች:</strong> ${u.ads} / 20</div>
+                <div><strong>👥 የጋበዛቸው ሰዎች:</strong> ${u.invites}</div>
+                <div><small style="color:#666;">የመጨረሻ እንቅስቃሴ: ${u.lastSeen || 'ያልታወቀ'}</small></div>
+                <button class="reset-btn" onclick="resetUserAccount('${u.tgId}')">🔄 Reset User Account</button>
             `;
-            listContainer.appendChild(item);
+            userListContainer.appendChild(uItem);
         });
     }
 
     function searchByTelegramId() {
         let searchId = document.getElementById("admin-search-id").value.trim();
+        globalUsers = JSON.parse(localStorage.getItem("globalUsersDatabase")) || {};
         if (searchId === "") {
-            renderAdminPanel(pendingRequests);
+            renderAdminPanel();
             return;
         }
-        let filteredRequests = pendingRequests.filter(req => req.tgId.includes(searchId));
-        renderAdminPanel(filteredRequests);
+        let filtered = Object.keys(globalUsers).filter(key => key.includes(searchId));
+        renderAdminPanel(filtered);
+    }
+
+    // አካውንት መርጦ ሪሴት (Reset) ማድረጊያ ፈንክሽን
+    function resetUserAccount(tgId) {
+        if (confirm(`እርግጠኛ ነህ የዚህን ተጠቃሚ (${tgId}) አካውንት ሙሉ በሙሉ ማጥፋት (Reset ማድረግ) ትፈልጋለህ?`)) {
+            globalUsers = JSON.parse(localStorage.getItem("globalUsersDatabase")) || {};
+            if (globalUsers[tgId]) {
+                globalUsers[tgId].bal = 0.00;
+                globalUsers[tgId].ads = 0;
+                globalUsers[tgId].invites = 0;
+                localStorage.setItem("globalUsersDatabase", JSON.stringify(globalUsers));
+                
+                if (tgId === myTelegramId) {
+                    balance = 0.00;
+                    adsWatchedToday = 0;
+                    inviteCount = 0;
+                    localStorage.setItem("appBalance", 0.00);
+                    localStorage.setItem("adsWatchedCount", 0);
+                    localStorage.setItem("userInviteCount", 0);
+                }
+                alert(`የተጠቃሚ ${tgId} መረጃ በተሳካ ሁኔታ Reset ሆኗል!`);
+                renderAdminPanel();
+            }
+        }
     }
 
     function approveRequest(id) {
@@ -464,13 +552,10 @@
         if (reqIndex > -1) {
             totalPaidOut += pendingRequests[reqIndex].amount;
             localStorage.setItem("adminTotalPaid", totalPaidOut);
-            
             pendingRequests.splice(reqIndex, 1);
             localStorage.setItem("adminRequests", JSON.stringify(pendingRequests));
-            
             alert("ጥያቄው በ Control Panel ጸድቋል!");
-            document.getElementById("admin-search-id").value = "";
-            renderAdminPanel(pendingRequests);
+            renderAdminPanel();
         }
     }
 
@@ -479,10 +564,8 @@
         if (reqIndex > -1) {
             pendingRequests.splice(reqIndex, 1);
             localStorage.setItem("adminRequests", JSON.stringify(pendingRequests));
-            
             alert("ጥያቄው ውድቅ ተደርጓል።");
-            document.getElementById("admin-search-id").value = "";
-            renderAdminPanel(pendingRequests);
+            renderAdminPanel();
         }
     }
 
